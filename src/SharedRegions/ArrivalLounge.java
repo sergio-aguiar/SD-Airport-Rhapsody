@@ -1,7 +1,7 @@
 package SharedRegions;
 
-import Interfaces.ALPassanger;
+import Interfaces.ALPassenger;
 import Interfaces.ALPorter;
 
-public class ArrivalLounge implements ALPassanger, ALPorter {
+public class ArrivalLounge implements ALPassenger, ALPorter {
 }

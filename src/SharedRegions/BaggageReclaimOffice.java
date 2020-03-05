@@ -1,6 +1,6 @@
 package SharedRegions;
 
-import Interfaces.BROPassanger;
+import Interfaces.BROPassenger;
 
-public class BaggageReclaimOffice implements BROPassanger {
+public class BaggageReclaimOffice implements BROPassenger {
 }

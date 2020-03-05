@@ -1,6 +1,6 @@
 package SharedRegions;
 
-import Interfaces.DTEPassanger;
+import Interfaces.DTEPassenger;
 
-public class DepartureTerminalEntrance implements DTEPassanger {
+public class DepartureTerminalEntrance implements DTEPassenger {
 }

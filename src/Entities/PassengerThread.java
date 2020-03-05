@@ -2,7 +2,7 @@ package Entities;
 
 public class PassengerThread extends Thread {
 
-    public enum PassengerStates {
+    private enum PassengerStates {
         AT_THE_DISEMBARKING_ZONE("adz"),
         AT_THE_LUGGAGE_COLLECTION_POINT("alc"),
         AT_THE_LUGGAGE_RECLAIM_OFFICE("alr"),

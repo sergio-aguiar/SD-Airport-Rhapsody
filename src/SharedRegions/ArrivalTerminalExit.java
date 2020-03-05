@@ -1,6 +1,6 @@
 package SharedRegions;
 
-import Interfaces.ATEPassanger;
+import Interfaces.ATEPassenger;
 
-public class ArrivalTerminalExit implements ATEPassanger {
+public class ArrivalTerminalExit implements ATEPassenger {
 }

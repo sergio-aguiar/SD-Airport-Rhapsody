@@ -2,7 +2,7 @@ package Entities;
 
 public class PorterThread extends Thread {
 
-    public enum PorterStates {
+    private enum PorterStates {
         WAITING_FOR_A_PLANE_TO_LAND("wptl"),
         AT_THE_PLANES_HOLD("atph"),
         AT_THE_LUGGAGE_BELT_CONVEYOR("alcb"),
