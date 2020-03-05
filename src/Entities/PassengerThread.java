@@ -1,5 +1,7 @@
 package Entities;
 
+import SharedRegions.*;
+
 public class PassengerThread extends Thread {
 
     private enum PassengerStates {
@@ -17,6 +19,46 @@ public class PassengerThread extends Thread {
         PassengerStates(String description) {
             this.description = description;
         }
+    }
+
+    private enum PassengerSituations {
+        TRT("TRT"),
+        FDT("FDT");
+
+        String description;
+
+        PassengerSituations(String description) {
+            this.description = description;
+        }
+    }
+
+    private PassengerStates state;
+    private final int id;
+    private final int luggageAtStart;
+    private int currentLuggage;
+
+    private final ArrivalLounge arrivalLounge;
+    private final ArrivalTerminalExit arrivalTerminalExit;
+    private final ArrivalTerminalTransferQuay arrivalTerminalTransferQuay;
+    private final BaggageCollectionPoint baggageCollectionPoint;
+    private final DepartureTerminalEntrance departureTerminalEntrance;
+    private final DepartureTerminalTransferQuay departureTerminalTransferQuay;
+
+    public PassengerThread(int id, int luggageAtStart, ArrivalLounge al, ArrivalTerminalExit ate,
+                           ArrivalTerminalTransferQuay attq, BaggageCollectionPoint bcp, DepartureTerminalEntrance dte,
+                           DepartureTerminalTransferQuay dttq) {
+        this.state = PassengerStates.AT_THE_DISEMBARKING_ZONE;
+
+        this.id = id;
+        this.luggageAtStart = luggageAtStart;
+        this.currentLuggage = 0;
+
+        this.arrivalLounge = al;
+        this.arrivalTerminalExit = ate;
+        this.arrivalTerminalTransferQuay = attq;
+        this.baggageCollectionPoint = bcp;
+        this.departureTerminalEntrance = dte;
+        this.departureTerminalTransferQuay = dttq;
     }
 
 }

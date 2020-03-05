@@ -16,6 +16,6 @@ public class TemporaryStorageArea implements TSAPorter {
 
     @Override
     public void tryToCollectABag() {
-        
+
     }
 }
