@@ -1,5 +1,8 @@
 package Entities;
 
+import Interfaces.ALPorter;
+import Interfaces.BCPPorter;
+import Interfaces.TSAPorter;
 import SharedRegions.*;
 
 import javax.sound.sampled.Port;
@@ -23,18 +26,23 @@ public class PorterThread extends Thread {
     private int luggageOnConveyorBelt;
     private int luggageOnStoreRoom;
 
-    private final ArrivalLounge arrivalLounge;
-    private final BaggageCollectionPoint baggageCollectionPoint;
-    private final TemporaryStorageArea temporaryStorageArea;
+    private final ALPorter alPorter;
+    private final BCPPorter bcpPorter;
+    private final TSAPorter tsaPorter;
 
-    public PorterThread(ArrivalLounge al, BaggageCollectionPoint bcp, TemporaryStorageArea tsa) {
+    public PorterThread(ALPorter al, BCPPorter bcp, TSAPorter tsa) {
         this.state = PorterStates.WAITING_FOR_A_PLANE_TO_LAND;
 
         this.luggageOnConveyorBelt = 0;
         this.luggageOnStoreRoom = 0;
 
-        this.arrivalLounge = al;
-        this.baggageCollectionPoint = bcp;
-        this.temporaryStorageArea = tsa;
+        this.alPorter = al;
+        this.bcpPorter = bcp;
+        this.tsaPorter = tsa;
+    }
+
+    @Override
+    public void run() {
+        super.run();
     }
 }

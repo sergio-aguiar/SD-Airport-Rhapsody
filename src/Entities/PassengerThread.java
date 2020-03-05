@@ -1,5 +1,6 @@
 package Entities;
 
+import Interfaces.*;
 import SharedRegions.*;
 
 public class PassengerThread extends Thread {
@@ -37,28 +38,31 @@ public class PassengerThread extends Thread {
     private final int luggageAtStart;
     private int currentLuggage;
 
-    private final ArrivalLounge arrivalLounge;
-    private final ArrivalTerminalExit arrivalTerminalExit;
-    private final ArrivalTerminalTransferQuay arrivalTerminalTransferQuay;
-    private final BaggageCollectionPoint baggageCollectionPoint;
-    private final DepartureTerminalEntrance departureTerminalEntrance;
-    private final DepartureTerminalTransferQuay departureTerminalTransferQuay;
+    private final ALPassenger alPassenger;
+    private final ATEPassenger atePassenger;
+    private final ATTQPassenger attqPassenger;
+    private final BCPPassenger bcpPassenger;
+    private final DTEPassenger dtePassenger;
+    private final DTTQPassenger dttqPassenger;
 
-    public PassengerThread(int id, int luggageAtStart, ArrivalLounge al, ArrivalTerminalExit ate,
-                           ArrivalTerminalTransferQuay attq, BaggageCollectionPoint bcp, DepartureTerminalEntrance dte,
-                           DepartureTerminalTransferQuay dttq) {
+    public PassengerThread(int id, int luggageAtStart, ALPassenger al, ATEPassenger ate, ATTQPassenger attq,
+                           BCPPassenger bcp, DTEPassenger dte, DTTQPassenger dttq) {
         this.state = PassengerStates.AT_THE_DISEMBARKING_ZONE;
 
         this.id = id;
         this.luggageAtStart = luggageAtStart;
         this.currentLuggage = 0;
 
-        this.arrivalLounge = al;
-        this.arrivalTerminalExit = ate;
-        this.arrivalTerminalTransferQuay = attq;
-        this.baggageCollectionPoint = bcp;
-        this.departureTerminalEntrance = dte;
-        this.departureTerminalTransferQuay = dttq;
+        this.alPassenger = al;
+        this.atePassenger = ate;
+        this.attqPassenger = attq;
+        this.bcpPassenger = bcp;
+        this.dtePassenger = dte;
+        this.dttqPassenger = dttq;
     }
 
+    @Override
+    public void run() {
+        super.run();
+    }
 }

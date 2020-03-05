@@ -1,5 +1,7 @@
 package Entities;
 
+import Interfaces.ATTQBusDriver;
+import Interfaces.DTTQBusDriver;
 import SharedRegions.ArrivalTerminalTransferQuay;
 import SharedRegions.DepartureTerminalTransferQuay;
 
@@ -18,20 +20,50 @@ public class BusDriverThread extends Thread {
         }
     }
 
+    private enum QueueAndSeatStates {
+        PASSENGER_0('0'),
+        PASSENGER_1('1'),
+        PASSENGER_2('2'),
+        PASSENGER_3('3'),
+        PASSENGER_4('4'),
+        PASSENGER_5('5'),
+        NO_PASSENGER('-');
+
+        char description;
+
+        QueueAndSeatStates(char description) { this.description = description; }
+    }
+
     private BusDriverStates state;
-    private final char[] waitingQueue;
-    private final char[] busSeats;
+    private final QueueAndSeatStates[] waitingQueue;
+    private final QueueAndSeatStates[] busSeats;
 
-    private final ArrivalTerminalTransferQuay arrivalTerminalTransferQuay;
-    private final DepartureTerminalTransferQuay departureTerminalTransferQuay;
+    private final ATTQBusDriver attqBusDriver;
+    private final DTTQBusDriver dttqBusDriver;
 
-    public BusDriverThread(ArrivalTerminalTransferQuay attq, DepartureTerminalTransferQuay dttq) {
+    public BusDriverThread(ATTQBusDriver attq, DTTQBusDriver dttq) {
         this.state = BusDriverStates.PARKING_AT_THE_ARRIVAL_TERMINAL;
 
-        this.waitingQueue = new char[6];
-        this.busSeats = new char[6];
+        this.waitingQueue = new QueueAndSeatStates[] {
+                QueueAndSeatStates.NO_PASSENGER,
+                QueueAndSeatStates.NO_PASSENGER,
+                QueueAndSeatStates.NO_PASSENGER,
+                QueueAndSeatStates.NO_PASSENGER,
+                QueueAndSeatStates.NO_PASSENGER,
+                QueueAndSeatStates.NO_PASSENGER
+        };
+        this.busSeats = new QueueAndSeatStates[] {
+                QueueAndSeatStates.NO_PASSENGER,
+                QueueAndSeatStates.NO_PASSENGER,
+                QueueAndSeatStates.NO_PASSENGER
+        };
 
-        this.arrivalTerminalTransferQuay = attq;
-        this.departureTerminalTransferQuay = dttq;
+        this.attqBusDriver = attq;
+        this.dttqBusDriver = dttq;
+    }
+
+    @Override
+    public void run() {
+        super.run();
     }
 }
