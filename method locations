@@ -1,0 +1,23 @@
+Porter:
+	- takeARest (Arrival Lounge)
+	- tryToCollectABag (Arrival Lounge, Baggage Collection Point, Temporary Storage)
+	- noMoreBagsToCollect (Arrival Lounge, Baggage Collection Point, Temporary Storage)
+	- carryItToAppropriateStore (Baggage Collection Point, Temporary Storage Area)
+	
+Bus Driver:
+	- hasDaysWorkEnded (Arrival Terminal Transfer Quay)
+	- announcingBusBording (Arrival Terminal Transfer Quay)
+	- goToDepartureTerminal (Departure Terminal Transfer Quay)
+	- parkTheBusAndLetPassOff (Departure Terminal Transfer Quay)
+	- goToArrivalTerminal (Arrival Terminal Transfer Quay)
+	- parkTheBuss (Arrival Terminal Transfer Quay)
+
+Passenger:
+	- whatShouldIDo (Arrival Lounge)
+	- goCollectABag (Baggage Collection Point)
+	- reportMissingBags (Baggage Reclaim Office)
+	- goHome (Arrival Terminal Exit)
+	- takeABus (Arrival Terminal Transfer Quay)
+	- enterTheBus (Arrival Terminal Transfer Quay)
+	- leaveTheBus (Departure Terminal Transfer Quay)
+	- prepareNextLeg (Departure Terminal Entrance)
