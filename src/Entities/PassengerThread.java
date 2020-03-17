@@ -1,5 +1,6 @@
 package Entities;
 
+import Extras.Bag;
 import Interfaces.*;
 import SharedRegions.*;
 
@@ -22,21 +23,23 @@ public class PassengerThread extends Thread {
         }
     }
 
-    private enum PassengerSituations {
+    public enum PassengerAndBagSituations {
         TRT("TRT"),
         FDT("FDT");
 
         String description;
 
-        PassengerSituations(String description) {
+        PassengerAndBagSituations(String description) {
             this.description = description;
         }
     }
 
     private PassengerStates state;
-    private final int id;
+    private PassengerAndBagSituations situation;
+    private final int pid;
     private final int luggageAtStart;
     private int currentLuggage;
+    private Bag[] bags;
 
     private final ALPassenger alPassenger;
     private final ATEPassenger atePassenger;
@@ -45,13 +48,15 @@ public class PassengerThread extends Thread {
     private final DTEPassenger dtePassenger;
     private final DTTQPassenger dttqPassenger;
 
-    public PassengerThread(int id, int luggageAtStart, ALPassenger al, ATEPassenger ate, ATTQPassenger attq,
-                           BCPPassenger bcp, DTEPassenger dte, DTTQPassenger dttq) {
+    public PassengerThread(int id,PassengerAndBagSituations ps, int luggageAtStart, ALPassenger al, ATEPassenger ate,
+                           ATTQPassenger attq, BCPPassenger bcp, DTEPassenger dte, DTTQPassenger dttq) {
         this.state = PassengerStates.AT_THE_DISEMBARKING_ZONE;
+        this.situation = ps;
 
-        this.id = id;
+        this.pid = id;
         this.luggageAtStart = luggageAtStart;
         this.currentLuggage = 0;
+        this.bags = new Bag[luggageAtStart];
 
         this.alPassenger = al;
         this.atePassenger = ate;
@@ -59,6 +64,20 @@ public class PassengerThread extends Thread {
         this.bcpPassenger = bcp;
         this.dtePassenger = dte;
         this.dttqPassenger = dttq;
+    }
+
+    public int getPassengerID() {
+        return this.pid;
+    }
+
+    public void collectBag(Bag bag) {
+        this.bags[currentLuggage] = bag;
+        this.currentLuggage++;
+    }
+
+    public Bag[] forfeitBags() {
+        this.currentLuggage = 0;
+        return this.bags;
     }
 
     @Override

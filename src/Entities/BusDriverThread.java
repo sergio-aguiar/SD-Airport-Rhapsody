@@ -5,6 +5,8 @@ import Interfaces.DTTQBusDriver;
 import SharedRegions.ArrivalTerminalTransferQuay;
 import SharedRegions.DepartureTerminalTransferQuay;
 
+import java.util.Arrays;
+
 public class BusDriverThread extends Thread {
 
     private enum BusDriverStates {
@@ -20,46 +22,36 @@ public class BusDriverThread extends Thread {
         }
     }
 
-    private enum QueueAndSeatStates {
-        PASSENGER_0('0'),
-        PASSENGER_1('1'),
-        PASSENGER_2('2'),
-        PASSENGER_3('3'),
-        PASSENGER_4('4'),
-        PASSENGER_5('5'),
-        NO_PASSENGER('-');
-
-        char description;
-
-        QueueAndSeatStates(char description) { this.description = description; }
-    }
-
     private BusDriverStates state;
-    private final QueueAndSeatStates[] waitingQueue;
-    private final QueueAndSeatStates[] busSeats;
+    private final String[] waitingQueue;
+    private final String[] busSeats;
 
     private final ATTQBusDriver attqBusDriver;
     private final DTTQBusDriver dttqBusDriver;
 
-    public BusDriverThread(ATTQBusDriver attq, DTTQBusDriver dttq) {
+    public BusDriverThread(ATTQBusDriver attq, DTTQBusDriver dttq, int nPassengers, int tBusSeats) {
         this.state = BusDriverStates.PARKING_AT_THE_ARRIVAL_TERMINAL;
 
-        this.waitingQueue = new QueueAndSeatStates[] {
-                QueueAndSeatStates.NO_PASSENGER,
-                QueueAndSeatStates.NO_PASSENGER,
-                QueueAndSeatStates.NO_PASSENGER,
-                QueueAndSeatStates.NO_PASSENGER,
-                QueueAndSeatStates.NO_PASSENGER,
-                QueueAndSeatStates.NO_PASSENGER
-        };
-        this.busSeats = new QueueAndSeatStates[] {
-                QueueAndSeatStates.NO_PASSENGER,
-                QueueAndSeatStates.NO_PASSENGER,
-                QueueAndSeatStates.NO_PASSENGER
-        };
+        this.waitingQueue = new String[nPassengers];
+        this.busSeats = new String[tBusSeats];
+
+        Arrays.fill(waitingQueue, "-");
+        Arrays.fill(busSeats, "-");
 
         this.attqBusDriver = attq;
         this.dttqBusDriver = dttq;
+    }
+
+    public boolean isWaitingQueueFull() {
+        for(int i = this.waitingQueue.length - 1; i >= 0; i--)
+            if(this.waitingQueue[i].equals("-")) return false;
+        return true;
+    }
+
+    public boolean isBusFull() {
+        for(int i = this.busSeats.length - 1; i >= 0; i--)
+            if(this.busSeats[i].equals("-")) return false;
+        return true;
     }
 
     @Override

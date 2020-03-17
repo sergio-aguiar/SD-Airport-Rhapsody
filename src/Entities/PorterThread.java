@@ -1,5 +1,6 @@
 package Entities;
 
+import Extras.Bag;
 import Interfaces.ALPorter;
 import Interfaces.BCPPorter;
 import Interfaces.TSAPorter;
@@ -25,6 +26,7 @@ public class PorterThread extends Thread {
     private PorterStates state;
     private int luggageOnConveyorBelt;
     private int luggageOnStoreRoom;
+    private Bag heldBag;
 
     private final ALPorter alPorter;
     private final BCPPorter bcpPorter;
@@ -39,6 +41,11 @@ public class PorterThread extends Thread {
         this.alPorter = al;
         this.bcpPorter = bcp;
         this.tsaPorter = tsa;
+    }
+
+    public boolean hasBag() {
+        if(this.heldBag == null) return false;
+        return true;
     }
 
     @Override
