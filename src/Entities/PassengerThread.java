@@ -4,6 +4,8 @@ import Extras.Bag;
 import Interfaces.*;
 import SharedRegions.*;
 
+import java.util.Arrays;
+
 public class PassengerThread extends Thread {
 
     private enum PassengerStates {
@@ -71,13 +73,15 @@ public class PassengerThread extends Thread {
     }
 
     public void collectBag(Bag bag) {
-        this.bags[currentLuggage] = bag;
+        this.bags[this.currentLuggage] = bag;
         this.currentLuggage++;
     }
 
     public Bag[] forfeitBags() {
         this.currentLuggage = 0;
-        return this.bags;
+        Bag[] bags = Arrays.copyOf(this.bags, this.bags.length);
+        this.bags = new Bag[this.luggageAtStart];
+        return bags;
     }
 
     @Override
