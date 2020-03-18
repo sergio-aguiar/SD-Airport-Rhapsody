@@ -8,7 +8,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver {
-
+    private Repository repositoryMonitor;
     private final ReentrantLock reentrantLock;
     private final Condition busQueueCondition;
     private final Condition busDriverCondition;
@@ -143,5 +143,13 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
     @Override
     public String[] goToDepartureTerminal() {
         return this.tmpBusSeats;
+    }
+
+    /**
+     *
+     * @param repositoryMonitor
+     */
+    public void setRepositoryMonitor(Repository repositoryMonitor) {
+        this.repositoryMonitor = repositoryMonitor;
     }
 }
