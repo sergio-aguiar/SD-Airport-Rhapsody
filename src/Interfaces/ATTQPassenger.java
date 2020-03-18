@@ -3,6 +3,6 @@ package Interfaces;
 public interface ATTQPassenger {
 
     public void takeABus();
-    public void enterTheBus();
+    public void enterTheBus(int pid);
 
 }
