@@ -4,7 +4,7 @@ public interface ATTQBusDriver {
 
     public boolean hasDaysWorkEnded();
     public void announcingBusBoarding();
-    public void goToArrivalTerminal();
+    public String[] goToDepartureTerminal();
     public void parkTheBus();
 
 }

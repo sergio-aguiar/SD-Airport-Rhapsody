@@ -6,7 +6,7 @@ import Interfaces.DTTQPassenger;
 public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriver {
 
     @Override
-    public void goToDepartureTerminal() {
+    public void goToArrivalTerminal() {
 
     }
 
