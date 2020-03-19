@@ -18,7 +18,6 @@ import Interfaces.DTTQBusDriver;
 import Interfaces.DTTQPassenger;
 import SharedRegions.*;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,45 +31,36 @@ public class SDAirportRhapsody {
     /**
      * @param args the command line arguments
      */
-    private final int NUMBER_OF_PLANE_LANDINDS      = 5;
-    private final int NUMBER_OF_PASSENGERS          = 6;
-    private final int NUMBER_OF_PIECES_OF_LUGGAGE   = 2;
-    private final int NUMBER_OF_BUS_SEATS           = 3;
-    private final int NUMBER_OF_BUS_DRIVERS         = 1;
-    private final int NUMBER_OF_PORTERS             = 1;
+    private static final int NUMBER_OF_PLANE_LANDINDS      = 5;
+    private static final int NUMBER_OF_PASSENGERS          = 6;
+    private static final int NUMBER_OF_PIECES_OF_LUGGAGE   = 2;
+    private static final int NUMBER_OF_BUS_SEATS           = 3;
+    private static final int NUMBER_OF_BUS_DRIVERS         = 1;
+    private static final int NUMBER_OF_PORTERS             = 1;
     
-    private final int flight_number                 = 0; 
-    private final int busSeatNumber                 = 0;
-    private int numberOfPassengerLuggageAtStart   = 0;
+    private static final int flight_number                 = 0; 
+    private static final int busSeatNumber                 = 0;
+    private static final int numberOfPassengerLuggageAtStart   = 0;
    
-    private PassengerThread[] passengers;
-    private BusDriverThread[] busDrivers;
-    private PorterThread[] porters;
+    private static PassengerThread[] passengers;
+    private static BusDriverThread[] busDrivers;
+    private static PorterThread[] porters;
     
-    private String[] passengerSituations;
+    private static String[] passengerSituations;
 
-    private ArrivalLounge arrivalLoungeMonitor;
-    private ArrivalTerminalExit arrivalTerminalExitMonitor;
-    private ArrivalTerminalTransferQuay arrivalTerminalTransferQuayMonitor;
-    private BaggageCollectionPoint baggageCollectionPointMonitor;
-    private BaggageReclaimOffice baggageReclaimOfficeMonitor;
-    private DepartureTerminalEntrance departureTerminalEntranceMonitor;
-    private DepartureTerminalTransferQuay departureTerminalTransferQuayMonitor;
-    private Repository repositoryMonitor;
-    private TemporaryStorageArea temporaryStorageAreaMonitor;
+    private static ArrivalLounge arrivalLoungeMonitor;
+    private static ArrivalTerminalExit arrivalTerminalExitMonitor;
+    private static ArrivalTerminalTransferQuay arrivalTerminalTransferQuayMonitor;
+    private static BaggageCollectionPoint baggageCollectionPointMonitor;
+    private static  BaggageReclaimOffice baggageReclaimOfficeMonitor;
+    private static DepartureTerminalEntrance departureTerminalEntranceMonitor;
+    private static DepartureTerminalTransferQuay departureTerminalTransferQuayMonitor;
+    private static Repository repositoryMonitor;
+    private static TemporaryStorageArea temporaryStorageAreaMonitor;
     
     
     public static void main(String[] args) {
         // TODO code application logic here
-        SDAirportRhapsody airportRhapsody = new SDAirportRhapsody();
-    }
-    
-    /**
-     * Main program
-     */
-    public SDAirportRhapsody() {
-           
-        
         // creating entity arrays
         try{
             passengers = new PassengerThread[NUMBER_OF_PASSENGERS];
@@ -118,8 +108,10 @@ public class SDAirportRhapsody {
 
              
 
-         } catch (InterruptedException | IOException ex) {
-            Logger.getLogger(SDAirportRhapsody.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException | IOException ex) {
+             Logger.getLogger(SDAirportRhapsody.class.getName()).log(Level.SEVERE, null, ex);
         }  
     }
-}
+}   
+    
+    
