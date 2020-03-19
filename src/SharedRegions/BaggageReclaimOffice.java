@@ -4,15 +4,14 @@ import Interfaces.BROPassenger;
 
 public class BaggageReclaimOffice implements BROPassenger {
 
-    private Repository repositoryMonitor;
+    private final Repository repository;
+
+    public BaggageReclaimOffice(Repository repository) {
+        this.repository = repository;
+    }
+
     @Override
     public void reportMissingBags() {
 
-    }
-     /**
-     * @param repositoryMonitor 
-     */
-    public void setRepositoryMonitor(Repository repositoryMonitor) {
-        this.repositoryMonitor = repositoryMonitor;
     }
 }

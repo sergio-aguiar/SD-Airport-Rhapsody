@@ -5,7 +5,12 @@ import Interfaces.BCPPorter;
 
 public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
 
-    private Repository repositoryMonitor;
+    private final Repository repository;
+
+    public BaggageCollectionPoint(Repository repository) {
+        this.repository = repository;
+    }
+
     @Override
     public void tryToCollectABag() {
 
@@ -24,12 +29,5 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
     @Override
     public void goCollectABag() {
 
-    }
-    
-     /**
-     * @param repositoryMonitor 
-     */
-    public void setRepositoryMonitor(Repository repositoryMonitor) {
-        this.repositoryMonitor = repositoryMonitor;
     }
 }

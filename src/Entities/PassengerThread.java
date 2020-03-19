@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class PassengerThread extends Thread {
 
-    private enum PassengerStates {
+    public enum PassengerStates {
         AT_THE_DISEMBARKING_ZONE("adz"),
         AT_THE_LUGGAGE_COLLECTION_POINT("alc"),
         AT_THE_LUGGAGE_RECLAIM_OFFICE("alr"),
@@ -36,8 +36,6 @@ public class PassengerThread extends Thread {
         }
     }
 
-    private PassengerStates state;
-    private PassengerAndBagSituations situation;
     private final int pid;
     private final int luggageAtStart;
     private int currentLuggage;
@@ -50,10 +48,8 @@ public class PassengerThread extends Thread {
     private final DTEPassenger dtePassenger;
     private final DTTQPassenger dttqPassenger;
 
-    public PassengerThread(int id,PassengerAndBagSituations ps, int luggageAtStart, ALPassenger al, ATEPassenger ate,
-                           ATTQPassenger attq, BCPPassenger bcp, DTEPassenger dte, DTTQPassenger dttq) {
-        this.state = PassengerStates.AT_THE_DISEMBARKING_ZONE;
-        this.situation = ps;
+    public PassengerThread(int id, int luggageAtStart, ALPassenger al, ATEPassenger ate, ATTQPassenger attq,
+                           BCPPassenger bcp, DTEPassenger dte, DTTQPassenger dttq) {
 
         this.pid = id;
         this.luggageAtStart = luggageAtStart;
@@ -86,6 +82,6 @@ public class PassengerThread extends Thread {
 
     @Override
     public void run() {
-        super.run();
+
     }
 }

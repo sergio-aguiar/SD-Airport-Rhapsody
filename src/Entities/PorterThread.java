@@ -10,7 +10,7 @@ import javax.sound.sampled.Port;
 
 public class PorterThread extends Thread {
 
-    private enum PorterStates {
+    public enum PorterStates {
         WAITING_FOR_A_PLANE_TO_LAND("wptl"),
         AT_THE_PLANES_HOLD("atph"),
         AT_THE_LUGGAGE_BELT_CONVEYOR("alcb"),
@@ -23,29 +23,17 @@ public class PorterThread extends Thread {
         }
     }
 
-    private PorterStates state;
-    private int luggageOnConveyorBelt;
-    private int luggageOnStoreRoom;
-    private Bag heldBag;
+    private final int pid;
 
     private final ALPorter alPorter;
     private final BCPPorter bcpPorter;
     private final TSAPorter tsaPorter;
 
-    public PorterThread(ALPorter al, BCPPorter bcp, TSAPorter tsa) {
-        this.state = PorterStates.WAITING_FOR_A_PLANE_TO_LAND;
-
-        this.luggageOnConveyorBelt = 0;
-        this.luggageOnStoreRoom = 0;
-
+    public PorterThread(int pid, ALPorter al, BCPPorter bcp, TSAPorter tsa) {
+        this.pid = pid;
         this.alPorter = al;
         this.bcpPorter = bcp;
         this.tsaPorter = tsa;
-    }
-
-    public boolean hasBag() {
-        if(this.heldBag == null) return false;
-        return true;
     }
 
     @Override

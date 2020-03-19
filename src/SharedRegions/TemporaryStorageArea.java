@@ -3,8 +3,13 @@ package SharedRegions;
 import Interfaces.TSAPorter;
 
 public class TemporaryStorageArea implements TSAPorter {
-    
-    private Repository repositoryMonitor;
+
+    private final Repository repository;
+
+    public TemporaryStorageArea(Repository repository) {
+        this.repository = repository;
+    }
+
     @Override
     public void carryItToAppropriateStore() {
 
@@ -18,12 +23,5 @@ public class TemporaryStorageArea implements TSAPorter {
     @Override
     public void tryToCollectABag() {
 
-    }
-    
-    /**
-     * @param repositoryMonitor 
-     */
-    public void setRepositoryMonitor(Repository repositoryMonitor) {
-        this.repositoryMonitor = repositoryMonitor;
     }
 }

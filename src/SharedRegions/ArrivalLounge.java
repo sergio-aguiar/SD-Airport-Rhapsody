@@ -4,9 +4,13 @@ import Interfaces.ALPassenger;
 import Interfaces.ALPorter;
 
 public class ArrivalLounge implements ALPassenger, ALPorter {
-   
-    private Repository repositoryMonitor;
-    
+
+    private final Repository repository;
+
+    public ArrivalLounge(Repository repository) {
+        this.repository = repository;
+    }
+
     @Override
     public void takeARest() {
 
@@ -25,12 +29,5 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     @Override
     public void whatShouldIDo() {
 
-    }
-    
-    /**
-     * @param repositoryMonitor 
-     */
-    public void setRepositoryMonitor(Repository repositoryMonitor) {
-        this.repositoryMonitor = repositoryMonitor;
     }
 }
