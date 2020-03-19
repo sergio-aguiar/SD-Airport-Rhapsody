@@ -47,9 +47,10 @@ public class PassengerThread extends Thread {
     private final BCPPassenger bcpPassenger;
     private final DTEPassenger dtePassenger;
     private final DTTQPassenger dttqPassenger;
+    private final BROPassenger broPassenger;
 
     public PassengerThread(int id, int luggageAtStart, ALPassenger al, ATEPassenger ate, ATTQPassenger attq,
-                           BCPPassenger bcp, DTEPassenger dte, DTTQPassenger dttq) {
+                           BCPPassenger bcp, DTEPassenger dte, DTTQPassenger dttq, BROPassenger bro) {
 
         this.pid = id;
         this.luggageAtStart = luggageAtStart;
@@ -62,6 +63,7 @@ public class PassengerThread extends Thread {
         this.bcpPassenger = bcp;
         this.dtePassenger = dte;
         this.dttqPassenger = dttq;
+        this.broPassenger = bro;
     }
 
     public int getPassengerID() {
