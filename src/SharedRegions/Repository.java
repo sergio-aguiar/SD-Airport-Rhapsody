@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import Entities.*;
@@ -26,6 +27,9 @@ public class Repository {
     private int numberOfLuggageAtTheStoreRoom;
 
     private Bag porterHeldBag;
+    private Stack<Bag> arrivedBags;
+    private Stack<Bag> bcpBags;
+    private Stack<Bag> tsaBags;
 
     private String[] busSeats;
     private String[] busWaitingQueue;
@@ -40,7 +44,8 @@ public class Repository {
     private BufferedWriter writer;
 
     public Repository(int numberOfPassengerLuggageAtStart, int maxNumberOfLuggagePerPassenger, int flightNumber,
-                      int busSeatNumber, int numberOfPassengers, String[] passengerSituations) throws IOException {
+                      int busSeatNumber, int numberOfPassengers, Stack<Bag> bags, String[] passengerSituations)
+            throws IOException {
 
         this.flightNumber = flightNumber;
 
@@ -57,6 +62,8 @@ public class Repository {
 
         this.busSeats = new String[busSeatNumber];
         this.busWaitingQueue = new String[numberOfPassengers];
+
+        this.arrivedBags = bags;
 
         Arrays.fill(this.busSeats, "-");
         Arrays.fill(this.busWaitingQueue, "-");
@@ -116,6 +123,10 @@ public class Repository {
         for(int i = 0; i < situations.length; i++)
             tmpSituations[i] = PassengerThread.PassengerAndBagSituations.valueOf(situations[i]);
         return tmpSituations;
+    }
+
+    public boolean isPorterDone() {
+        return this.flightNumber == -1;
     }
 
     public void addToWaitingQueue(int pid, int positionInQueue) {
@@ -186,6 +197,30 @@ public class Repository {
 
     public int getBusSeatNumber() {
         return this.busSeatNumber;
+    }
+
+    public int numberOfBags() {
+        return this.arrivedBags.size();
+    }
+
+    public String getBag() {
+        this.porterHeldBag = this.arrivedBags.pop();
+        return this.porterHeldBag.toString();
+    }
+
+    public boolean isPassengerBagInBaggageCollectionPoint(int pid) {
+        for(Bag bag : this.bcpBags) if(bag.getPassengerID() == pid) return true;
+        return false;
+    }
+
+    public void carryBagToBaggageCollectionPoint() {
+        this.bcpBags.push(this.porterHeldBag);
+        this.porterHeldBag = null;
+    }
+
+    public void carryBagToTemporaryStorageArea() {
+        this.tsaBags.push(this.porterHeldBag);
+        this.porterHeldBag = null;
     }
 
     public PassengerThread.PassengerAndBagSituations getPassengerSituation(int pid) {

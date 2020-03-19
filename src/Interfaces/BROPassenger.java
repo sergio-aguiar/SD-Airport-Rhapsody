@@ -1,5 +1,5 @@
 package Interfaces;
 
 public interface BROPassenger {
-    public void reportMissingBags();
+    public void reportMissingBags(int pid);
 }

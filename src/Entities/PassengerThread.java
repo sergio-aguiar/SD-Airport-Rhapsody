@@ -34,11 +34,17 @@ public class PassengerThread extends Thread {
         PassengerAndBagSituations(String description) {
             this.description = description;
         }
+
+        @Override
+        public String toString() {
+            return this.description;
+        }
     }
 
     private final int pid;
     private final int luggageAtStart;
     private int currentLuggage;
+    private int luggageRetrievalAttempts;
     private Bag[] bags;
 
     private final ALPassenger alPassenger;
@@ -55,6 +61,7 @@ public class PassengerThread extends Thread {
         this.pid = id;
         this.luggageAtStart = luggageAtStart;
         this.currentLuggage = 0;
+        this.luggageRetrievalAttempts = 0;
         this.bags = new Bag[luggageAtStart];
 
         this.alPassenger = al;
@@ -84,6 +91,22 @@ public class PassengerThread extends Thread {
 
     @Override
     public void run() {
-
+        if(this.alPassenger.whatShouldIDo(this.pid).equals(PassengerAndBagSituations.FDT.toString())) {
+            if(this.luggageAtStart == 0) this.atePassenger.goHome(this.pid);
+            if(this.alPassenger.goCollectABag(this.pid)) this.currentLuggage++;
+            this.luggageRetrievalAttempts++;
+            while(this.luggageRetrievalAttempts < this.luggageAtStart) {
+                if(this.bcpPassenger.goCollectABag(this.pid)) this.currentLuggage++;
+                this.luggageRetrievalAttempts++;
+            }
+            if(this.currentLuggage == this.luggageAtStart) this.atePassenger.goHome(this.pid);
+            this.broPassenger.reportMissingBags(this.pid);
+            this.atePassenger.goHome(this.pid);
+        } else {
+            this.attqPassenger.takeABus(this.pid);
+            this.attqPassenger.enterTheBus(this.pid);
+            this.dttqPassenger.leaveTheBus(this.pid);
+            this.dtePassenger.prepareNextLeg(this.pid);
+        }
     }
 }

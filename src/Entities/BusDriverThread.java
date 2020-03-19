@@ -33,6 +33,9 @@ public class BusDriverThread extends Thread {
         while(!this.attqBusDriver.hasDaysWorkEnded()) {
             this.attqBusDriver.announcingBusBoarding();
             this.attqBusDriver.goToDepartureTerminal(this.bid);
+            this.dttqBusDriver.parkTheBusAndLetPassOff(this.bid);
+            this.dttqBusDriver.goToArrivalTerminal(this.bid);
+            this.attqBusDriver.parkTheBus(this.bid);
         }
     }
 }

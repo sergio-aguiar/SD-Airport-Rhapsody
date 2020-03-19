@@ -1,12 +1,9 @@
 package Entities;
 
-import Extras.Bag;
+import Exceptions.PorterDoneException;
 import Interfaces.ALPorter;
 import Interfaces.BCPPorter;
 import Interfaces.TSAPorter;
-import SharedRegions.*;
-
-import javax.sound.sampled.Port;
 
 public class PorterThread extends Thread {
 
@@ -38,6 +35,22 @@ public class PorterThread extends Thread {
 
     @Override
     public void run() {
-        super.run();
+        while(true) {
+            try {
+                this.alPorter.takeARest(this.pid);
+            //} catch (PorterDoneException e) {
+            } catch (Exception e) {
+                break;
+            }
+            String bagSituation = this.alPorter.tryToCollectABag(this.pid);
+            while(bagSituation != null) {
+                if(bagSituation.equals(PassengerThread.PassengerAndBagSituations.FDT.toString()))
+                    this.bcpPorter.carryItToAppropriateStore(this.pid);
+                else
+                    this.tsaPorter.carryItToAppropriateStore(this.pid);
+                bagSituation = this.alPorter.tryToCollectABag(this.pid);
+            }
+            this.alPorter.noMoreBagsToCollect(this.pid);
+        }
     }
 }

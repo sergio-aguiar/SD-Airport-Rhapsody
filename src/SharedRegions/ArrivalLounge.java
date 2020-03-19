@@ -2,6 +2,7 @@ package SharedRegions;
 
 import Entities.PassengerThread;
 import Entities.PorterThread;
+import Exceptions.PorterDoneException;
 import Interfaces.ALPassenger;
 import Interfaces.ALPorter;
 
@@ -15,6 +16,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     private final Condition porterCondition;
 
     private int passengersThatReached;
+    private int bagsLeftToCollect;
 
     private final Repository repository;
 
@@ -23,6 +25,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.passengerCondition = this.reentrantLock.newCondition();
         this.porterCondition = this.reentrantLock.newCondition();
         this.passengersThatReached = 0;
+        this.bagsLeftToCollect = 0;
         this.repository = repository;
     }
 
@@ -30,6 +33,8 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     public void takeARest(int pid) {
         this.reentrantLock.lock();
         try {
+            if(this.repository.isPorterDone())
+                throw new PorterDoneException("The porter's services are no longer needed.");
             this.porterCondition.await();
         } catch (Exception e) {
             System.out.print(e.toString());
@@ -51,21 +56,32 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     }
 
     @Override
-    public void tryToCollectABag(int pid) {
+    public String whatShouldIDo(int pid) {
+        this.passengersThatReached++;
+        if(this.passengersThatReached == this.repository.getNumberOfPassengers()) this.porterCondition.signal();
+        return this.repository.getPassengerSituation(pid).toString();
+    }
+
+    @Override
+    public String tryToCollectABag(int pid) {
+        this.repository.setPorterState(pid, PorterThread.PorterStates.AT_THE_PLANES_HOLD);
+        if(this.bagsLeftToCollect == 0) this.bagsLeftToCollect = this.repository.numberOfBags();
+        if(this.bagsLeftToCollect != 0) return this.repository.getBag();
+        return null;
+    }
+
+    @Override
+    public boolean goCollectABag(int pid) {
+        boolean success = false;
         this.reentrantLock.lock();
         try {
-            this.repository.setPorterState(pid, PorterThread.PorterStates.AT_THE_PLANES_HOLD);
+            if(this.repository.isPassengerBagInBaggageCollectionPoint(pid)) success = true;
+            this.repository.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_LUGGAGE_COLLECTION_POINT);
         } catch (Exception e) {
             System.out.print(e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
-    }
-
-    @Override
-    public PassengerThread.PassengerAndBagSituations whatShouldIDo(int pid) {
-        this.passengersThatReached++;
-        if(this.passengersThatReached == this.repository.getNumberOfPassengers()) this.porterCondition.signal();
-        return this.repository.getPassengerSituation(pid);
+        return success;
     }
 }

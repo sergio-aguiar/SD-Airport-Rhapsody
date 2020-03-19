@@ -61,7 +61,7 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
     }
 
     @Override
-    public void parkTheBusAndLetPassOff(int bid, String[] busSeats) {
+    public void parkTheBusAndLetPassOff(int bid) {
         this.reentrantLock.lock();
         try {
             this.repository.setBusDriverState(bid, BusDriverThread.BusDriverStates.PARKING_AT_THE_DEPARTURE_TERMINAL);

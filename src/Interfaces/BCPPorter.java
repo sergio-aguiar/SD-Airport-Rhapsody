@@ -1,7 +1,7 @@
 package Interfaces;
 
+import Extras.Bag;
+
 public interface BCPPorter {
-    public void tryToCollectABag();
-    public void noMoreBagsToCollect();
-    public void carryItToAppropriateStore();
+    public void carryItToAppropriateStore(int pid);
 }

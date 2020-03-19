@@ -3,5 +3,6 @@ package Interfaces;
 import Entities.PassengerThread;
 
 public interface ALPassenger {
-    public PassengerThread.PassengerAndBagSituations whatShouldIDo(int pid);
+    public String whatShouldIDo(int pid);
+    public boolean goCollectABag(int pid);
 }
