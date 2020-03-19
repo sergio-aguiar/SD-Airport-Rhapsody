@@ -1,5 +1,7 @@
 package Interfaces;
 
+import Entities.PassengerThread;
+
 public interface ALPassenger {
-    public void whatShouldIDo();
+    public PassengerThread.PassengerAndBagSituations whatShouldIDo(int pid);
 }

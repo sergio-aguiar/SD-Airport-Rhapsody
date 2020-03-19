@@ -20,9 +20,9 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
     private final Repository repository;
 
     public DepartureTerminalTransferQuay(Repository repository) {
-        this.reentrantLock = new ReentrantLock();
-        this.passengerCondition = reentrantLock.newCondition();
-        this.busDriverCondition = reentrantLock.newCondition();
+        this.reentrantLock = new ReentrantLock(true);
+        this.passengerCondition = this.reentrantLock.newCondition();
+        this.busDriverCondition = this.reentrantLock.newCondition();
         this.passengersThatArrived = 0;
         this.passengersThatLeftTheBus = 0;
         this.repository = repository;

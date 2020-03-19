@@ -181,11 +181,15 @@ public class Repository {
     }
 
     public int getNumberOfPassengers() {
-        return numberOfPassengers;
+        return this.numberOfPassengers;
     }
 
     public int getBusSeatNumber() {
-        return busSeatNumber;
+        return this.busSeatNumber;
+    }
+
+    public PassengerThread.PassengerAndBagSituations getPassengerSituation(int pid) {
+        return this.passengerSituations[pid];
     }
 }
 

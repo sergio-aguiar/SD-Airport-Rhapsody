@@ -22,8 +22,8 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
 
     public ArrivalTerminalTransferQuay(Repository repository){
         this.reentrantLock = new ReentrantLock(true);
-        this.busQueueCondition = reentrantLock.newCondition();
-        this.busDriverCondition = reentrantLock.newCondition();
+        this.busQueueCondition = this.reentrantLock.newCondition();
+        this.busDriverCondition = this.reentrantLock.newCondition();
         this.queuedPassengers = 0;
         this.passengersInBus = 0;
         this.passengersTaken = 0;
