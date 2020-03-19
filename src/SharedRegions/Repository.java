@@ -16,7 +16,6 @@ public class Repository {
     private int flightNumber;
 
     private final int numberOfPassengers;
-    private final int maxNumberOfLuggagePerPassenger;
     private final int busSeatNumber;
 
     private int numberOfPassengerLuggageAtStart;
@@ -43,14 +42,12 @@ public class Repository {
     private File logFile;
     private BufferedWriter writer;
 
-    public Repository(int numberOfPassengerLuggageAtStart, int maxNumberOfLuggagePerPassenger, int flightNumber,
-                      int busSeatNumber, int numberOfPassengers, Stack<Bag> bags, String[] passengerSituations)
-            throws IOException {
+    public Repository(int numberOfPassengerLuggageAtStart, int flightNumber, int busSeatNumber, int numberOfPassengers,
+                      Stack<Bag> bags, String[] passengerSituations) throws IOException {
 
         this.flightNumber = flightNumber;
 
         this.numberOfPassengers = numberOfPassengers;
-        this.maxNumberOfLuggagePerPassenger = maxNumberOfLuggagePerPassenger;
         this.busSeatNumber = busSeatNumber;
 
         this.numberOfPassengerLuggageAtStart = numberOfPassengerLuggageAtStart;
@@ -64,6 +61,8 @@ public class Repository {
         this.busWaitingQueue = new String[numberOfPassengers];
 
         this.arrivedBags = bags;
+        this.bcpBags = new Stack<>();
+        this.tsaBags = new Stack<>();
 
         Arrays.fill(this.busSeats, "-");
         Arrays.fill(this.busWaitingQueue, "-");
@@ -147,10 +146,6 @@ public class Repository {
         this.busWaitingQueue = Arrays.copyOf(tmpQueue, this.numberOfPassengers);
     }
 
-    public void clearBusWaitingQueue() {
-        Arrays.fill(this.busWaitingQueue, "-");
-    }
-
     public void addToBusSeats(int pid, int seatInBus) {
         this.busSeats[seatInBus] = String.valueOf(pid);
     }
@@ -167,10 +162,6 @@ public class Repository {
         }
         tmpSeats[this.busSeatNumber - 1] = "-";
         this.busSeats = Arrays.copyOf(tmpSeats, this.busSeatNumber);
-    }
-
-    public void clearBusSeats() {
-        Arrays.fill(this.busSeats, "-");
     }
 
     public int numberOfPassengersInBus() {
@@ -199,12 +190,14 @@ public class Repository {
         return this.busSeatNumber;
     }
 
-    public int numberOfBags() {
-        return this.arrivedBags.size();
+    public int getNumberOfLuggageLeftToCollect() {
+        return this.numberOfPassengerLuggageAtStart - this.numberOfPassengerLuggagePresentlyCollected;
     }
 
     public String getBag() {
         this.porterHeldBag = this.arrivedBags.pop();
+        if(this.bcpBags.peek().equals(this.porterHeldBag)) this.bcpBags.pop();
+        else if(this.tsaBags.peek().equals(this.porterHeldBag)) this.tsaBags.pop();
         return this.porterHeldBag.toString();
     }
 
@@ -216,11 +209,13 @@ public class Repository {
     public void carryBagToBaggageCollectionPoint() {
         this.bcpBags.push(this.porterHeldBag);
         this.porterHeldBag = null;
+        this.numberOfLuggageOnConveyor++;
     }
 
     public void carryBagToTemporaryStorageArea() {
         this.tsaBags.push(this.porterHeldBag);
         this.porterHeldBag = null;
+        this.numberOfLuggageAtTheStoreRoom++;
     }
 
     public PassengerThread.PassengerAndBagSituations getPassengerSituation(int pid) {

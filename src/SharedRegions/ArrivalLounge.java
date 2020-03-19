@@ -16,7 +16,6 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     private final Condition porterCondition;
 
     private int passengersThatReached;
-    private int bagsLeftToCollect;
 
     private final Repository repository;
 
@@ -25,7 +24,6 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.passengerCondition = this.reentrantLock.newCondition();
         this.porterCondition = this.reentrantLock.newCondition();
         this.passengersThatReached = 0;
-        this.bagsLeftToCollect = 0;
         this.repository = repository;
     }
 
@@ -65,8 +63,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     @Override
     public String tryToCollectABag(int pid) {
         this.repository.setPorterState(pid, PorterThread.PorterStates.AT_THE_PLANES_HOLD);
-        if(this.bagsLeftToCollect == 0) this.bagsLeftToCollect = this.repository.numberOfBags();
-        if(this.bagsLeftToCollect != 0) return this.repository.getBag();
+        if(this.repository.getNumberOfLuggageLeftToCollect() != 0) return this.repository.getBag();
         return null;
     }
 
