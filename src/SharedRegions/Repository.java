@@ -21,6 +21,8 @@ public class Repository {
     private int numberOfPassengerLuggageAtStart;
     private int numberOfPassengerLuggagePresentlyCollected;
 
+    private int numberOfFlightPassengersDone;
+
     private int numberOfLuggageAtThePlane;
     private int numberOfLuggageOnConveyor;
     private int numberOfLuggageAtTheStoreRoom;
@@ -38,6 +40,10 @@ public class Repository {
     private PorterThread.PorterStates[] porterStates;
 
     private PassengerThread.PassengerAndBagSituations[] passengerSituations;
+    private int fdtPassengers;
+    private int trtPassengers;
+    private int fdtPassengersDone;
+    private int trtPassengersDone;
 
     private File logFile;
     private BufferedWriter writer;
@@ -52,6 +58,8 @@ public class Repository {
 
         this.numberOfPassengerLuggageAtStart = numberOfPassengerLuggageAtStart;
         this.numberOfPassengerLuggagePresentlyCollected = 0;
+
+        this.numberOfFlightPassengersDone = 0;
 
         this.numberOfLuggageAtThePlane = numberOfPassengerLuggageAtStart;
         this.numberOfLuggageAtTheStoreRoom = 0;
@@ -76,6 +84,7 @@ public class Repository {
         Arrays.fill(this.porterStates, PorterThread.PorterStates.WAITING_FOR_A_PLANE_TO_LAND);
 
         this.passengerSituations = Arrays.copyOf(this.stringArrayToSituationArray(passengerSituations), passengerSituations.length);
+        this.countPassengerDestinations(passengerSituations);
 
         // open data stream to log file
         this.logFile = new File("logFile_" + System.nanoTime() + ".txt");
@@ -124,6 +133,11 @@ public class Repository {
         return tmpSituations;
     }
 
+    private void countPassengerDestinations(String[] situations) {
+        for(String situation : situations) if(situation.equals("TRT")) this.trtPassengers++;
+        else if(situation.equals("FDT")) this.fdtPassengers++;
+    }
+
     public boolean isPorterDone() {
         return this.flightNumber == -1;
     }
@@ -170,6 +184,10 @@ public class Repository {
         return passengerCount;
     }
 
+    public void addFlightPassengerDone() {
+        this.numberOfFlightPassengersDone++;
+    }
+
     public void setPassengerState(int pid, PassengerThread.PassengerStates passengerState) {
         this.passengerStates[pid] = passengerState;
     }
@@ -194,6 +212,22 @@ public class Repository {
         return this.numberOfPassengerLuggageAtStart - this.numberOfPassengerLuggagePresentlyCollected;
     }
 
+    public int getFdtPassengers() {
+        return this.fdtPassengers;
+    }
+
+    public int getFdtPassengersDone() {
+        return this.fdtPassengersDone;
+    }
+
+    public int getTrtPassengers() {
+        return this.trtPassengers;
+    }
+
+    public int getTrtPassengersDone() {
+        return this.trtPassengersDone;
+    }
+
     public String getBag() {
         this.porterHeldBag = this.arrivedBags.pop();
         if(this.bcpBags.peek().equals(this.porterHeldBag)) this.bcpBags.pop();
@@ -206,6 +240,11 @@ public class Repository {
         return false;
     }
 
+    public int getPorterHeldBagID() {
+        if(this.porterHeldBag == null) return -1;
+        return this.porterHeldBag.getPassengerID();
+    }
+
     public void carryBagToBaggageCollectionPoint() {
         this.bcpBags.push(this.porterHeldBag);
         this.porterHeldBag = null;
@@ -216,6 +255,20 @@ public class Repository {
         this.tsaBags.push(this.porterHeldBag);
         this.porterHeldBag = null;
         this.numberOfLuggageAtTheStoreRoom++;
+    }
+
+    public void claimBagFromBaggageCollectionPoint(int pid) {
+        Bag[] bags = (Bag[]) this.bcpBags.toArray();
+        for(int i = 0; i < bags.length; i++) if(bags[i].getPassengerID() == pid) {
+            Bag[] tmpBags = new Bag[bags.length - 1];
+            System.arraycopy(bags, 0, tmpBags, 0, i);
+            if (bags.length - i + 1 >= 0) System.arraycopy(bags, i + 1, tmpBags, i, bags.length - i + 1);
+            this.bcpBags = new Stack<>();
+            for (Bag tmpBag : tmpBags) this.bcpBags.push(tmpBag);
+            this.numberOfPassengerLuggagePresentlyCollected++;
+            this.numberOfLuggageOnConveyor--;
+            break;
+        }
     }
 
     public PassengerThread.PassengerAndBagSituations getPassengerSituation(int pid) {

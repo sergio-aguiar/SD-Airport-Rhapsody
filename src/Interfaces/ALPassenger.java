@@ -4,5 +4,5 @@ import Entities.PassengerThread;
 
 public interface ALPassenger {
     public String whatShouldIDo(int pid);
-    public boolean goCollectABag(int pid);
+    public void goCollectABag(int pid);
 }

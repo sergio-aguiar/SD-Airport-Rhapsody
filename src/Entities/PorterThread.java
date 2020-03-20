@@ -35,13 +35,7 @@ public class PorterThread extends Thread {
 
     @Override
     public void run() {
-        while(true) {
-            try {
-                this.alPorter.takeARest(this.pid);
-            //} catch (PorterDoneException e) {
-            } catch (Exception e) {
-                break;
-            }
+        while(!this.alPorter.takeARest(this.pid)) {
             String bagSituation = this.alPorter.tryToCollectABag(this.pid);
             while(bagSituation != null) {
                 if(bagSituation.equals(PassengerThread.PassengerAndBagSituations.FDT.toString()))
