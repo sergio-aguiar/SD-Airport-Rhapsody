@@ -6,6 +6,7 @@
 package sd.airport.rhapsody;
 
 import Entities.*;
+import Extras.Bag;
 import Interfaces.ALPassenger;
 import Interfaces.ALPorter;
 import Interfaces.ATEPassenger;
@@ -18,6 +19,8 @@ import Interfaces.DTTQBusDriver;
 import Interfaces.DTTQPassenger;
 import SharedRegions.*;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,10 +34,11 @@ public class SDAirportRhapsody {
     /**
      * @param args the command line arguments
      */
-    private static final int NUMBER_OF_PLANE_LANDINDS      = 5;
-    private static final int NUMBER_OF_PASSENGERS          = 6;
-    private static final int NUMBER_OF_PIECES_OF_LUGGAGE   = 2;
-    private static final int NUMBER_OF_BUS_SEATS           = 3;
+    private static final int K        = 5;
+    private static final int N      = 6;
+    private static final int M      = 2;
+    private static final int T      = 3;
+ 
     private static final int NUMBER_OF_BUS_DRIVERS         = 1;
     private static final int NUMBER_OF_PORTERS             = 1;
     
@@ -46,8 +50,16 @@ public class SDAirportRhapsody {
     private static BusDriverThread[] busDrivers;
     private static PorterThread[] porters;
     
+    private static String[][] pStat;
+    private static int[][] nBags;
+    private static int [][] nBagsMissing;
+    private static int nT;
+    private static int[] nTotal;
     private static String[] passengerSituations;
-
+    private static Stack <Bag> bags;
+    
+    private static PassengerThread.PassengerStates[] passengerStates = new PassengerThread.PassengerStates[N];
+    
     private static ArrivalLounge arrivalLoungeMonitor;
     private static ArrivalTerminalExit arrivalTerminalExitMonitor;
     private static ArrivalTerminalTransferQuay arrivalTerminalTransferQuayMonitor;
@@ -62,13 +74,14 @@ public class SDAirportRhapsody {
     public static void main(String[] args) {
         // TODO code application logic here
         // creating entity arrays
+        
         try{
-            passengers = new PassengerThread[NUMBER_OF_PASSENGERS];
+            passengers = new PassengerThread[N];
             busDrivers = new BusDriverThread[NUMBER_OF_BUS_DRIVERS];
             porters = new PorterThread[NUMBER_OF_PORTERS];
             
             // creating Logger
-            repositoryMonitor = new Repository(numberOfPassengerLuggageAtStart,NUMBER_OF_PIECES_OF_LUGGAGE, flight_number,busSeatNumber, NUMBER_OF_PASSENGERS, passengerSituations);
+            repositoryMonitor = new Repository(numberOfPassengerLuggageAtStart, flight_number,busSeatNumber, N, bags, passengerSituations);
             // creating monitors
 
             arrivalLoungeMonitor = new ArrivalLounge(repositoryMonitor);
@@ -85,7 +98,7 @@ public class SDAirportRhapsody {
 
             // starting entities
                 //PASSENGERS
-            for(int i=0; i<NUMBER_OF_PASSENGERS; i++){
+            for(int i=0; i<N; i++){
                     passengers[i] = new PassengerThread(i,numberOfPassengerLuggageAtStart,(ALPassenger)arrivalLoungeMonitor, (ATEPassenger)arrivalTerminalExitMonitor, (ATTQPassenger)arrivalTerminalTransferQuayMonitor, (BCPPassenger)baggageCollectionPointMonitor,(DTEPassenger)departureTerminalEntranceMonitor,(DTTQPassenger)departureTerminalTransferQuayMonitor, (BROPassenger)baggageReclaimOfficeMonitor);
                 }
                  //BUS DRIVER
@@ -97,7 +110,7 @@ public class SDAirportRhapsody {
                     porters[i] = new PorterThread(i, (ALPorter)arrivalLoungeMonitor, baggageCollectionPointMonitor, temporaryStorageAreaMonitor);
                 }
 
-            for(int i=0; i<NUMBER_OF_PASSENGERS; i++){passengers[i].start();}
+            for(int i=0; i<N; i++){passengers[i].start();}
             for(int i=0; i<NUMBER_OF_BUS_DRIVERS; i++){busDrivers[i].start();}
             for(int i=0; i<NUMBER_OF_PORTERS; i++){porters[i].start();}
 
@@ -108,9 +121,43 @@ public class SDAirportRhapsody {
 
              
 
-        } catch (InterruptedException | IOException ex) {
+        } catch (InterruptedException ex) {
              Logger.getLogger(SDAirportRhapsody.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(SDAirportRhapsody.class.getName()).log(Level.SEVERE, null, ex);
         }  
+    }
+    
+    private static void piecesOfLuggage(){
+        for (int land = 0; land < K; land++){
+            nT = 0;
+            for(int nP = 0; nP < N; nP++){
+                
+                Arrays.fill(passengerStates, PassengerThread.PassengerStates.AT_THE_DISEMBARKING_ZONE);
+                
+                // Passenger State
+                if((Math.random() < 0.4))
+                    pStat[nP][land] = "FDT";
+                else
+                    pStat[nP][land] = "TRT";
+                
+                // Number Bags
+                if (Math.random() < 0.5)
+                    nBags[nP][land] = 2;
+                else if(Math.random() < 0.5)
+                     nBags[nP][land] = 1;
+                else 
+                     nBags[nP][land] = 0;
+                
+                if(pStat[nP][land]== "TRT" || nBags[nP][land] == 0)
+                    nBagsMissing[nP][land] = nBags[nP][land];      // no missing bags
+                else if (Math.random() < 0.5)
+                     nBagsMissing[nP][land] = nBags[nP][land] - 1; //passenfer lost 1 bag
+             
+                nT += nBags[nP][land];
+            }
+        nTotal[land] = nT;                                          // number of bags per plane
+        }
     }
 }   
     
