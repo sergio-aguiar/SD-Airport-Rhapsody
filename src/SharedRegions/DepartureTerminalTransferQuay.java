@@ -28,16 +28,12 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
         this.repository = repository;
     }
 
-    private void getOutOfBus(int pid) {
-        this.repository.removeFromBusSeats(pid);
-        this.passengersThatLeftTheBus++;
-        if(this.passengersThatLeftTheBus == this.passengersThatArrived) this.busDriverCondition.signal();
-    }
-
     @Override
     public void goToArrivalTerminal(int bid) {
         this.reentrantLock.lock();
         try {
+            this.passengersThatArrived = 0;
+            this.passengersThatLeftTheBus = 0;
             this.repository.setBusDriverState(bid, BusDriverThread.BusDriverStates.DRIVING_BACKWARD);
         } catch(Exception e) {
             System.out.print(e.toString());
@@ -51,7 +47,8 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
         this.reentrantLock.lock();
         try {
             this.passengerCondition.await();
-            this.getOutOfBus(pid);
+            this.passengersThatLeftTheBus++;
+            if(this.passengersThatLeftTheBus == this.passengersThatArrived) this.busDriverCondition.signal();
             this.repository.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_DEPARTURE_TRANSFER_TERMINAL);
         } catch(Exception e) {
             System.out.print(e.toString());
@@ -61,11 +58,11 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
     }
 
     @Override
-    public void parkTheBusAndLetPassOff(int bid) {
+    public void parkTheBusAndLetPassOff(int bid, int passengersThatArrived) {
         this.reentrantLock.lock();
         try {
             this.repository.setBusDriverState(bid, BusDriverThread.BusDriverStates.PARKING_AT_THE_DEPARTURE_TERMINAL);
-            this.passengersThatArrived = this.repository.numberOfPassengersInBus();
+            this.passengersThatArrived = passengersThatArrived;
             this.passengerCondition.signalAll();
             this.busDriverCondition.await();
         } catch(Exception e) {

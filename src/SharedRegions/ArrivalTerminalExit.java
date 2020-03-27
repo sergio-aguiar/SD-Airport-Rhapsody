@@ -43,6 +43,7 @@ public class ArrivalTerminalExit implements ATEPassenger {
             if(this.waitingPassengers + this.dte.getWaitingPassengers() == this.totalPassengers) {
                 this.dte.signalWaitingPassengers();
                 this.passengerCondition.signalAll();
+                this.waitingPassengers = 0;
             }
             else this.passengerCondition.await();
         } catch (Exception e) {

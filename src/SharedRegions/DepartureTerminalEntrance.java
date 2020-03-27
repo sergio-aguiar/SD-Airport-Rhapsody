@@ -44,6 +44,7 @@ public class DepartureTerminalEntrance implements DTEPassenger {
             if(this.waitingPassengers + this.ate.getWaitingPassengers() == this.totalPassengers) {
                 this.ate.signalWaitingPassengers();
                 this.passengerCondition.signalAll();
+                this.waitingPassengers = 0;
             }
             else this.passengerCondition.await();
         } catch (Exception e) {
