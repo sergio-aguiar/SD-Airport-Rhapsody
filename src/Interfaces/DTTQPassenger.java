@@ -10,5 +10,5 @@ public interface DTTQPassenger {
      * The Passenger leaves the Bus.
      * @param pid Passanger id.
      */
-    public void leaveTheBus(int pid);
+    public void leaveTheBus(int pid, int seat);
 }

@@ -47,36 +47,23 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         this.busWaitingQueue[positionInQueue] = String.valueOf(pid);
     }
 
-    private void removeFromWaitingQueue(int pid) {
+    private int removeFromWaitingQueue(int pid) {
         String[] tmpQueue = new String[this.totalPassengers];
-        boolean found = false;
+        int found = -1;
         for(int i = 0; i < this.totalPassengers; i++) {
-            if(this.busWaitingQueue[i].equals(String.valueOf(pid))) found = true;
+            if(this.busWaitingQueue[i].equals(String.valueOf(pid))) found = i;
             else {
-                if(found) tmpQueue[i - 1] = this.busWaitingQueue[i];
+                if(found != -1) tmpQueue[i - 1] = this.busWaitingQueue[i];
                 else tmpQueue[i] = this.busWaitingQueue[i];
             }
         }
         tmpQueue[this.totalPassengers - 1] = "-";
         this.busWaitingQueue = Arrays.copyOf(tmpQueue, this.totalPassengers);
+        return found;
     }
 
     private void addToBusSeats(int pid, int seatInBus) {
         this.busSeats[seatInBus] = String.valueOf(pid);
-    }
-
-    private void removeFromBusSeats(int pid) {
-        String[] tmpSeats = new String[this.busSeatNumber];
-        boolean found = false;
-        for(int i = 0; i < this.busSeatNumber; i++) {
-            if(this.busSeats[i].equals(String.valueOf(pid))) found = true;
-            else {
-                if(found) tmpSeats[i - 1] = this.busSeats[i];
-                else tmpSeats[i] = this.busSeats[i];
-            }
-        }
-        tmpSeats[this.busSeatNumber - 1] = "-";
-        this.busSeats = Arrays.copyOf(tmpSeats, this.busSeatNumber);
     }
 
     private int numberOfPassengersInBus() {
@@ -85,19 +72,22 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         return passengerCount;
     }
 
-    private void getIntoQueue(int pid) {
-        this.repository.addToWaitingQueue(pid, queuedPassengers);
+    private int getIntoQueue(int pid) {
+        this.addToWaitingQueue(pid, queuedPassengers);
         this.queuedPassengers++;
+        return this.queuedPassengers - 1;
     }
 
-    private void getOutOfQueue(int pid) {
-        this.repository.removeFromWaitingQueue(pid);
+    private int getOutOfQueue(int pid) {
+        int queuePosition = this.removeFromWaitingQueue(pid);
         this.queuedPassengers--;
+        return queuePosition;
     }
 
-    private void getIntoBus(int pid) {
-        this.repository.addToBusSeats(pid, this.passengersInBus);
+    private int getIntoBus(int pid) {
+        this.addToBusSeats(pid, this.passengersInBus);
         this.passengersInBus++;
+        return this.passengersInBus - 1;
     }
 
     @Override
@@ -118,13 +108,16 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
     }
 
     @Override
-    public void enterTheBus(int pid) {
+    public int enterTheBus(int pid) {
+        int busSeat = -1;
+        int queuePosition = -1;
         this.reentrantLock.lock();
         try {
-            this.getOutOfQueue(pid);
-            this.getIntoBus(pid);
+            queuePosition = this.getOutOfQueue(pid);
+            this.repository.passengerGettingOutOfTheWaitingQueue(queuePosition);
+            busSeat = this.getIntoBus(pid);
             this.passengersSignaled--;
-            this.repository.setPassengerState(pid, PassengerThread.PassengerStates.TERMINAL_TRANSFER);
+            this.repository.passengerEnteringTheBus(pid, this.passengersInBus - 1);
             if(this.passengersSignaled == 0)
                 this.busDriverCondition.signal();
         } catch (Exception e) {
@@ -132,6 +125,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         } finally {
             this.reentrantLock.unlock();
         }
+        return busSeat;
     }
 
     @Override
@@ -144,7 +138,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         this.reentrantLock.lock();
         try {
             this.passengersInBus = 0;
-            this.repository.setBusDriverState(bid, BusDriverThread.BusDriverStates.PARKING_AT_THE_ARRIVAL_TERMINAL);
+            this.repository.busDriverParkingTheBus();
         } catch (Exception e) {
             System.out.print(e.toString());
         } finally {
@@ -154,11 +148,13 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
 
     @Override
     public void takeABus(int pid) {
+        int queuePosition = -1;
         this.reentrantLock.lock();
         try {
-            this.getIntoQueue(pid);
+            queuePosition = this.getIntoQueue(pid);
+            this.repository.passengerGettingIntoTheWaitingQueue(pid, queuePosition);
             if(this.queuedPassengers == this.busSeatNumber) this.busDriverCondition.signal();
-            this.repository.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_ARRIVAL_TRANSFER_TERMINAL);
+            this.repository.passengerTakingABus(pid);
             this.busQueueCondition.await();
         } catch (Exception e) {
             System.out.print(e.toString());
@@ -172,7 +168,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         int busPassengers = 0;
         this.reentrantLock.lock();
         try {
-            this.repository.setBusDriverState(bid, BusDriverThread.BusDriverStates.DRIVING_FORWARD);
+            this.repository.busDriverGoingToDepartureTerminal();
             busPassengers = this.numberOfPassengersInBus();
         } catch (Exception e) {
             System.out.print(e.toString());

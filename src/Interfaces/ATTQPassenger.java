@@ -15,5 +15,5 @@ public interface ATTQPassenger {
      * The Passenger enters the Bus.
      * @param pid Passenger id.
      */
-    public void enterTheBus(int pid);
+    public int enterTheBus(int pid);
 }

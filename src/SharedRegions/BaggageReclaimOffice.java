@@ -17,10 +17,10 @@ public class BaggageReclaimOffice implements BROPassenger {
     }
 
     @Override
-    public void reportMissingBags(int pid) {
+    public void reportMissingBags(int pid, int missingBags) {
         this.reentrantLock.lock();
         try {
-            this.repository.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_LUGGAGE_RECLAIM_OFFICE);
+            this.repository.passengerReportingMissingBags(pid, missingBags);
         } catch (Exception e) {
             System.out.print(e.toString());
         } finally {

@@ -50,7 +50,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     private void bagArrayToStack(int flightNumber) {
         for(int i = 0; i < this.luggagePerFlight[this.flightNumber].length; i++)
             if(this.luggagePerFlight[this.flightNumber][i] != null)
-                bagsInThePlane.push(this.luggagePerFlight[this.flightNumber][i]);
+                this.bagsInThePlane.push(this.luggagePerFlight[this.flightNumber][i]);
     }
 
     public void nextFlight() {
@@ -61,8 +61,8 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     /** 
      * Porter method: The porter takes a rest.
      * 
-     * @param pid Poter id.
-     * @return true if take a rest or false otherwise.
+     * @param pid Porter id.
+     * @return true if taking a rest and false otherwise.
      */
     @Override
     public boolean takeARest(int pid) {
@@ -93,9 +93,11 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
      */
     @Override
     public String tryToCollectABag(int pid) {
-        this.repository.setPorterState(pid, PorterThread.PorterStates.AT_THE_PLANES_HOLD);
-        if(this.luggageNumberPerFlight[this.flightNumber] != this.luggagePickedUp)
+        if(this.luggageNumberPerFlight[this.flightNumber] != this.luggagePickedUp) {
+            this.repository.porterTryCollectingBagFromPlane(true);
             return this.bagsInThePlane.pop().toString();
+        }
+        this.repository.porterTryCollectingBagFromPlane(false);
         return null;
     }
 	 /**
@@ -106,7 +108,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     public void goCollectABag(int pid) {
         this.reentrantLock.lock();
         try {
-            this.repository.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_LUGGAGE_COLLECTION_POINT);
+            this.repository.passengerGoingToCollectABag(pid);
         } catch (Exception e) {
             System.out.print(e.toString());
         } finally {

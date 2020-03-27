@@ -39,7 +39,7 @@ public class DepartureTerminalEntrance implements DTEPassenger {
     public void prepareNextLeg(int pid) {
         this.reentrantLock.lock();
         try {
-            this.repository.setPassengerState(pid, PassengerThread.PassengerStates.ENTERING_THE_DEPARTURE_TERMINAL);
+            this.repository.passengerPreparingNextLeg(pid);
             this.waitingPassengers++;
             if(this.waitingPassengers + this.ate.getWaitingPassengers() == this.totalPassengers) {
                 this.ate.signalWaitingPassengers();

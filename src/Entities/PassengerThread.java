@@ -68,7 +68,12 @@ public class PassengerThread extends Thread {
      * Passenger bag and situation state.
      */
     private final PassengerAndBagSituations passengerSituation;
-	
+
+    /**
+     * Passenger's current seat on the bus.
+     */
+    private int busSeat;
+
     /**
      * Instance of the Passenger Arrival Lounge interface.
      */
@@ -119,6 +124,7 @@ public class PassengerThread extends Thread {
         this.luggageAtStart = luggageAtStart;
         this.currentLuggage = 0;
         this.passengerSituation = situation;
+        this.busSeat = -1;
         this.alPassenger = al;
         this.atePassenger = ate;
         this.attqPassenger = attq;
@@ -126,13 +132,6 @@ public class PassengerThread extends Thread {
         this.dtePassenger = dte;
         this.dttqPassenger = dttq;
         this.broPassenger = bro;
-    }
-	/**
-     * Get Passanger ID.
-     * @return passanger id.
-     */
-    public int getPassengerID() {
-        return this.pid;
     }
 	
 	/**
@@ -147,13 +146,14 @@ public class PassengerThread extends Thread {
                 while(this.bcpPassenger.goCollectABag(this.pid)) {
                     this.currentLuggage++;
                 }
-                if(this.currentLuggage != this.luggageAtStart) this.broPassenger.reportMissingBags(this.pid);
+                if(this.currentLuggage != this.luggageAtStart)
+                    this.broPassenger.reportMissingBags(this.pid, this.luggageAtStart - this.currentLuggage);
             }
             this.atePassenger.goHome(this.pid);
         } else {
             this.attqPassenger.takeABus(this.pid);
-            this.attqPassenger.enterTheBus(this.pid);
-            this.dttqPassenger.leaveTheBus(this.pid);
+            this.busSeat = this.attqPassenger.enterTheBus(this.pid);
+            this.dttqPassenger.leaveTheBus(this.pid, this.busSeat);
             this.dtePassenger.prepareNextLeg(this.pid);
         }
     }

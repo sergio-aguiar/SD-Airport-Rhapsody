@@ -1,12 +1,9 @@
 package SharedRegions;
 
-import Entities.PassengerThread;
 import Entities.PorterThread;
-import Extras.Bag;
 import Interfaces.BCPPassenger;
 import Interfaces.BCPPorter;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -49,6 +46,7 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
             this.passengerLuggageConditions[pid].await();
             if(this.isPassengerBagInCollectionPoint(pid)) {
                 this.claimBagFromBaggageCollectionPoint(pid);
+                this.repository.passengerCollectingABag(pid);
                 success = true;
             }
         } catch (Exception e) {
@@ -63,7 +61,7 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
     public void carryItToAppropriateStore(int pid, int bagID) {
         this.reentrantLock.lock();
         try {
-            this.repository.setPorterState(pid, PorterThread.PorterStates.AT_THE_LUGGAGE_BELT_CONVEYOR);
+            this.repository.porterCarryBagToBaggageCollectionPoint();
             this.bcpBags.add(bagID);
             this.passengerLuggageConditions[bagID].signal();
         } catch (Exception e) {
@@ -78,7 +76,7 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
         this.reentrantLock.lock();
         try {
             for(Condition c : this.passengerLuggageConditions) c.signal();
-            this.repository.setPorterState(pid, PorterThread.PorterStates.WAITING_FOR_A_PLANE_TO_LAND);
+            this.repository.porterAnnouncingNoMoreBagsToCollect();
         } catch (Exception e) {
             System.out.print(e.toString());
         } finally {

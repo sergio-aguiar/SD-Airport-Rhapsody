@@ -5,86 +5,63 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import Entities.*;
-import Extras.Bag;
 
 public class Repository {
 
     private int flightNumber;
-
-    private final int numberOfPassengers;
-    private final int busSeatNumber;
-
-    private int numberOfPassengerLuggageAtStart;
-    private int numberOfPassengerLuggagePresentlyCollected;
-
-    private int numberOfFlightPassengersDone;
-
     private int numberOfLuggageAtThePlane;
+
+    private PorterThread.PorterStates porterState;
     private int numberOfLuggageOnConveyor;
     private int numberOfLuggageAtTheStoreRoom;
 
-    private Bag porterHeldBag;
-    private Stack<Bag> arrivedBags;
-    private Stack<Bag> bcpBags;
-    private Stack<Bag> tsaBags;
-
+    private BusDriverThread.BusDriverStates busDriverState;
     private String[] busSeats;
     private String[] busWaitingQueue;
 
     private PassengerThread.PassengerStates[] passengerStates;
-    private BusDriverThread.BusDriverStates[] busDriverStates;
-    private PorterThread.PorterStates[] porterStates;
-
     private PassengerThread.PassengerAndBagSituations[] passengerSituations;
-    private int fdtPassengers;
-    private int trtPassengers;
-    private int fdtPassengersDone;
-    private int trtPassengersDone;
+    private int[] passengerLuggageAtStart;
+    private int[] passengerLuggageCollected;
+
+    private int numberOfFDTPassengers;
+    private int numberOfTRTPassengers;
+    private int numberOfBagsThatShouldHaveBeenTransported;
+    private int numberOfBagsThatWereLost;
 
     private File logFile;
     private BufferedWriter writer;
 
-    public Repository(int numberOfPassengerLuggageAtStart, int flightNumber, int busSeatNumber, int numberOfPassengers,
-                      Stack<Bag> bags, String[] passengerSituations) throws IOException {
+    public Repository(int flightNumber, int numberOfPassengerLuggageAtThePlane, int busSeatNumber, int totalPassengers,
+                      PassengerThread.PassengerAndBagSituations[] passengerSituations, int[] passengerLuggageAtStart)
+            throws IOException {
 
         this.flightNumber = flightNumber;
+        this.numberOfLuggageAtThePlane = numberOfPassengerLuggageAtThePlane;
 
-        this.numberOfPassengers = numberOfPassengers;
-        this.busSeatNumber = busSeatNumber;
-
-        this.numberOfPassengerLuggageAtStart = numberOfPassengerLuggageAtStart;
-        this.numberOfPassengerLuggagePresentlyCollected = 0;
-
-        this.numberOfFlightPassengersDone = 0;
-
-        this.numberOfLuggageAtThePlane = numberOfPassengerLuggageAtStart;
+        this.porterState = PorterThread.PorterStates.WAITING_FOR_A_PLANE_TO_LAND;
         this.numberOfLuggageAtTheStoreRoom = 0;
         this.numberOfLuggageOnConveyor = 0;
 
+        this.busDriverState = BusDriverThread.BusDriverStates.PARKING_AT_THE_ARRIVAL_TERMINAL;
         this.busSeats = new String[busSeatNumber];
-        this.busWaitingQueue = new String[numberOfPassengers];
-
-        this.arrivedBags = bags;
-        this.bcpBags = new Stack<>();
-        this.tsaBags = new Stack<>();
-
+        this.busWaitingQueue = new String[totalPassengers];
         Arrays.fill(this.busSeats, "-");
         Arrays.fill(this.busWaitingQueue, "-");
 
         this.passengerStates = new PassengerThread.PassengerStates[6];
-        this.busDriverStates = new BusDriverThread.BusDriverStates[1];
-        this.porterStates = new PorterThread.PorterStates[1];
-
         Arrays.fill(this.passengerStates, PassengerThread.PassengerStates.AT_THE_DISEMBARKING_ZONE);
-        Arrays.fill(this.busDriverStates, BusDriverThread.BusDriverStates.PARKING_AT_THE_ARRIVAL_TERMINAL);
-        Arrays.fill(this.porterStates, PorterThread.PorterStates.WAITING_FOR_A_PLANE_TO_LAND);
+        this.passengerSituations = passengerSituations;
+        this.passengerLuggageAtStart = passengerLuggageAtStart;
+        this.passengerLuggageCollected = new int[totalPassengers];
+        Arrays.fill(this.passengerLuggageCollected, 0);
 
-        this.passengerSituations = Arrays.copyOf(this.stringArrayToSituationArray(passengerSituations), passengerSituations.length);
-        this.countPassengerDestinations(passengerSituations);
+        this.calculatePassengerSituations();
+        this.calculateBagsThatShouldHaveBeenOnThePlane();
+        this.numberOfBagsThatWereLost = 0;
 
         // open data stream to log file
         this.logFile = new File("logFile_" + System.nanoTime() + ".txt");
@@ -112,12 +89,11 @@ public class Repository {
     }
     
     private void log() {
-
         String line = "";
         //Plane number + number of luggage at the planes
         line += this.flightNumber + " " + this.numberOfLuggageAtThePlane + "   ";
         // Porter states
-        line += this.porterStates[0] + " ";
+        line += this.porterState + " ";
         
         try {
             this.writer.write((line + "\n"));
@@ -126,153 +102,124 @@ public class Repository {
         }
     }
 
-    private PassengerThread.PassengerAndBagSituations[] stringArrayToSituationArray(String[] situations) {
-        PassengerThread.PassengerAndBagSituations[] tmpSituations = new PassengerThread.PassengerAndBagSituations[situations.length];
-        for(int i = 0; i < situations.length; i++)
-            tmpSituations[i] = PassengerThread.PassengerAndBagSituations.valueOf(situations[i]);
-        return tmpSituations;
+    private void calculatePassengerSituations() {
+        for(PassengerThread.PassengerAndBagSituations situation : this.passengerSituations)
+            if(situation.toString().equals("TRT")) this.numberOfTRTPassengers++;
+            else if(situation.toString().equals("FDT")) this.numberOfFDTPassengers++;
     }
 
-    private void countPassengerDestinations(String[] situations) {
-        for(String situation : situations) if(situation.equals("TRT")) this.trtPassengers++;
-        else if(situation.equals("FDT")) this.fdtPassengers++;
+    private void calculateBagsThatShouldHaveBeenOnThePlane() {
+        for(int passengerBags : this.passengerLuggageAtStart)
+            this.numberOfBagsThatShouldHaveBeenTransported += passengerBags;
     }
 
-    public boolean isPorterDone() {
-        return this.flightNumber == -1;
-    }
-
-    public void addToWaitingQueue(int pid, int positionInQueue) {
-        this.busWaitingQueue[positionInQueue] = String.valueOf(pid);
-    }
-
-    public void removeFromWaitingQueue(int pid) {
-        String[] tmpQueue = new String[this.numberOfPassengers];
-        boolean found = false;
-        for(int i = 0; i < this.numberOfPassengers; i++) {
-            if(this.busWaitingQueue[i].equals(String.valueOf(pid))) found = true;
-            else {
-                if(found) tmpQueue[i - 1] = this.busWaitingQueue[i];
-                else tmpQueue[i] = this.busWaitingQueue[i];
-            }
-        }
-        tmpQueue[this.numberOfPassengers - 1] = "-";
-        this.busWaitingQueue = Arrays.copyOf(tmpQueue, this.numberOfPassengers);
-    }
-
-    public void addToBusSeats(int pid, int seatInBus) {
-        this.busSeats[seatInBus] = String.valueOf(pid);
-    }
-
-    public void removeFromBusSeats(int pid) {
-        String[] tmpSeats = new String[this.busSeatNumber];
-        boolean found = false;
-        for(int i = 0; i < this.busSeatNumber; i++) {
-            if(this.busSeats[i].equals(String.valueOf(pid))) found = true;
-            else {
-                if(found) tmpSeats[i - 1] = this.busSeats[i];
-                else tmpSeats[i] = this.busSeats[i];
-            }
-        }
-        tmpSeats[this.busSeatNumber - 1] = "-";
-        this.busSeats = Arrays.copyOf(tmpSeats, this.busSeatNumber);
-    }
-
-    public int numberOfPassengersInBus() {
-        int passengerCount = 0;
-        for(String seat : this.busSeats) if(!seat.equals("-")) passengerCount++;
-        return passengerCount;
-    }
-
-    public void addFlightPassengerDone() {
-        this.numberOfFlightPassengersDone++;
-    }
-
-    public void setPassengerState(int pid, PassengerThread.PassengerStates passengerState) {
+    private void setPassengerState(int pid, PassengerThread.PassengerStates passengerState) {
         this.passengerStates[pid] = passengerState;
     }
 
-    public void setPorterState(int pid, PorterThread.PorterStates porterState) {
-        this.porterStates[pid] = porterState;
+    private void setPorterState(PorterThread.PorterStates porterState) {
+        this.porterState = porterState;
     }
 
-    public void setBusDriverState(int bid, BusDriverThread.BusDriverStates busDriverState) {
-        this.busDriverStates[bid] = busDriverState;
+    private void setBusDriverState(BusDriverThread.BusDriverStates busDriverState) {
+        this.busDriverState = busDriverState;
     }
 
-    public int getNumberOfPassengers() {
-        return this.numberOfPassengers;
+    public void porterTryCollectingBagFromPlane(boolean success) {
+        this.setPorterState(PorterThread.PorterStates.AT_THE_PLANES_HOLD);
+        if(success) this.numberOfLuggageAtThePlane--;
+        this.log();
     }
 
-    public int getBusSeatNumber() {
-        return this.busSeatNumber;
-    }
-
-    public int getNumberOfLuggageLeftToCollect() {
-        return this.numberOfPassengerLuggageAtStart - this.numberOfPassengerLuggagePresentlyCollected;
-    }
-
-    public int getFdtPassengers() {
-        return this.fdtPassengers;
-    }
-
-    public int getFdtPassengersDone() {
-        return this.fdtPassengersDone;
-    }
-
-    public int getTrtPassengers() {
-        return this.trtPassengers;
-    }
-
-    public int getTrtPassengersDone() {
-        return this.trtPassengersDone;
-    }
-
-    public String getBag() {
-        this.porterHeldBag = this.arrivedBags.pop();
-        if(this.bcpBags.peek().equals(this.porterHeldBag)) this.bcpBags.pop();
-        else if(this.tsaBags.peek().equals(this.porterHeldBag)) this.tsaBags.pop();
-        return this.porterHeldBag.toString();
-    }
-
-    public boolean isPassengerBagInBaggageCollectionPoint(int pid) {
-        for(Bag bag : this.bcpBags) if(bag.getPassengerID() == pid) return true;
-        return false;
-    }
-
-    public int getPorterHeldBagID() {
-        if(this.porterHeldBag == null) return -1;
-        return this.porterHeldBag.getPassengerID();
-    }
-
-    public void carryBagToBaggageCollectionPoint() {
-        this.bcpBags.push(this.porterHeldBag);
-        this.porterHeldBag = null;
+    public void porterCarryBagToBaggageCollectionPoint() {
+        this.setPorterState(PorterThread.PorterStates.AT_THE_LUGGAGE_BELT_CONVEYOR);
         this.numberOfLuggageOnConveyor++;
+        this.log();
     }
 
-    public void carryBagToTemporaryStorageArea() {
-        this.tsaBags.push(this.porterHeldBag);
-        this.porterHeldBag = null;
+    public void porterCarryBagToTemporaryStorageArea() {
+        this.setPorterState(PorterThread.PorterStates.AT_THE_STOREROOM);
         this.numberOfLuggageAtTheStoreRoom++;
+        this.log();
     }
 
-    public void claimBagFromBaggageCollectionPoint(int pid) {
-        Bag[] bags = (Bag[]) this.bcpBags.toArray();
-        for(int i = 0; i < bags.length; i++) if(bags[i].getPassengerID() == pid) {
-            Bag[] tmpBags = new Bag[bags.length - 1];
-            System.arraycopy(bags, 0, tmpBags, 0, i);
-            if (bags.length - i + 1 >= 0) System.arraycopy(bags, i + 1, tmpBags, i, bags.length - i + 1);
-            this.bcpBags = new Stack<>();
-            for (Bag tmpBag : tmpBags) this.bcpBags.push(tmpBag);
-            this.numberOfPassengerLuggagePresentlyCollected++;
-            this.numberOfLuggageOnConveyor--;
-            break;
-        }
+    public void porterAnnouncingNoMoreBagsToCollect() {
+        this.setPorterState(PorterThread.PorterStates.WAITING_FOR_A_PLANE_TO_LAND);
+        this.log();
     }
 
-    public PassengerThread.PassengerAndBagSituations getPassengerSituation(int pid) {
-        return this.passengerSituations[pid];
+    public void passengerGoingToCollectABag(int pid) {
+        this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_LUGGAGE_COLLECTION_POINT);
+        this.log();
+    }
+
+    public void passengerCollectingABag(int pid) {
+        this.numberOfLuggageOnConveyor--;
+        this.passengerLuggageCollected[pid]++;
+        this.log();
+    }
+
+    public void passengerGoingHome(int pid) {
+        this.setPassengerState(pid, PassengerThread.PassengerStates.EXITING_THE_ARRIVAL_TERMINAL);
+        this.log();
+    }
+
+    public void passengerEnteringTheBus(int pid, int seat) {
+        this.setPassengerState(pid, PassengerThread.PassengerStates.TERMINAL_TRANSFER);
+        this.busSeats[seat] = String.valueOf(pid);
+        this.log();
+    }
+
+    public void passengerTakingABus(int pid) {
+        this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_ARRIVAL_TRANSFER_TERMINAL);
+        this.log();
+    }
+
+    public void passengerReportingMissingBags(int pid, int missingBags) {
+        this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_LUGGAGE_RECLAIM_OFFICE);
+        this.numberOfBagsThatWereLost += missingBags;
+        this.log();
+    }
+
+    public void passengerPreparingNextLeg(int pid) {
+        this.setPassengerState(pid, PassengerThread.PassengerStates.ENTERING_THE_DEPARTURE_TERMINAL);
+        this.log();
+    }
+
+    public void passengerLeavingTheBus(int pid, int seat) {
+        this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_DEPARTURE_TRANSFER_TERMINAL);
+        this.busSeats[seat] = "-";
+        this.log();
+    }
+
+    public void passengerGettingIntoTheWaitingQueue(int pid, int position) {
+        this.busWaitingQueue[position] = String.valueOf(pid);
+        this.log();
+    }
+
+    public void passengerGettingOutOfTheWaitingQueue(int position) {
+        this.busWaitingQueue[position] = "-";
+        this.log();
+    }
+
+    public void busDriverParkingTheBus() {
+        this.setBusDriverState(BusDriverThread.BusDriverStates.PARKING_AT_THE_ARRIVAL_TERMINAL);
+        this.log();
+    }
+
+    public void busDriverGoingToDepartureTerminal() {
+        this.setBusDriverState(BusDriverThread.BusDriverStates.DRIVING_FORWARD);
+        this.log();
+    }
+
+    public void busDriverGoingToArrivalTerminal() {
+        this.setBusDriverState(BusDriverThread.BusDriverStates.DRIVING_BACKWARD);
+        this.log();
+    }
+
+    public void busDriverParkingTheBusAndLettingPassengersOff() {
+        this.setBusDriverState(BusDriverThread.BusDriverStates.PARKING_AT_THE_DEPARTURE_TERMINAL);
+        this.log();
     }
 }
 

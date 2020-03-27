@@ -20,11 +20,15 @@ public class TemporaryStorageArea implements TSAPorter {
         this.repository = repository;
     }
 
+    public void nextFlight() {
+        this.tsaBags.clear();
+    }
+
     @Override
     public void carryItToAppropriateStore(int pid, int bagID) {
         this.reentrantLock.lock();
         try {
-            this.repository.setPorterState(pid, PorterThread.PorterStates.AT_THE_STOREROOM);
+            this.repository.porterCarryBagToTemporaryStorageArea();
             this.tsaBags.add(bagID);
         } catch (Exception e) {
             System.out.print(e.toString());

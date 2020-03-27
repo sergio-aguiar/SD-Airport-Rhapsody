@@ -38,7 +38,7 @@ public class ArrivalTerminalExit implements ATEPassenger {
     public void goHome(int pid) {
         this.reentrantLock.lock();
         try {
-            this.repository.setPassengerState(pid, PassengerThread.PassengerStates.EXITING_THE_ARRIVAL_TERMINAL);
+            this.repository.passengerGoingHome(pid);
             this.waitingPassengers++;
             if(this.waitingPassengers + this.dte.getWaitingPassengers() == this.totalPassengers) {
                 this.dte.signalWaitingPassengers();
