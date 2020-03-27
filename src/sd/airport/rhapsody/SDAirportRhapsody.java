@@ -34,6 +34,8 @@ public class SDAirportRhapsody {
     /**
      * @param args the command line arguments
      */
+   
+    
     private static final int K      = 2;
     private static final int N      = 3;
     private static final int M      = 2;
@@ -61,10 +63,9 @@ public class SDAirportRhapsody {
     private static final int [][] nBagsMissing = new int[N][K];
     private static int nT;
     private static final int[] nTotal = new int[K];
-    private static String[] passengerSituations;
-    private static Stack <Bag> bags;
-  
-    
+    private static PassengerThread.PassengerAndBagSituations[] passengerSituations;
+    private static Bag[][] bag;
+   
     private static final PassengerThread.PassengerStates[] passengerStates = new PassengerThread.PassengerStates[N];
     
     private static ArrivalLounge arrivalLoungeMonitor;
@@ -84,8 +85,8 @@ public class SDAirportRhapsody {
         
         try{
             piecesOfLuggage();
-            passengerSituations = bi_to_uni(pStat);
-            System.out.println(Arrays.toString(passengerSituations));  
+   
+            //System.out.println(Arrays.toString(passengerSituations));  
             
          
             passengers = new PassengerThread[N];
@@ -93,15 +94,15 @@ public class SDAirportRhapsody {
             porters = new PorterThread[NUMBER_OF_PORTERS];
         
             // creating Logger
-            repositoryMonitor = new Repository(numberOfPassengerLuggageAtStart, flightNumber,busSeatNumber, N, bags, passengerSituations);
+            repositoryMonitor = new Repository(flightNumber, numberOfPassengerLuggageAtStart,busSeatNumber, N, passengerSituations, nTotal);
 
             // creating monitors
-            arrivalLoungeMonitor = new ArrivalLounge(repositoryMonitor, N, nTotal, nBags);
+            arrivalLoungeMonitor = new ArrivalLounge(repositoryMonitor, N, nTotal, bag);
             arrivalTerminalExitMonitor = new ArrivalTerminalExit(repositoryMonitor, departureTerminalEntranceMonitor,N);
-            arrivalTerminalTransferQuayMonitor = new ArrivalTerminalTransferQuay(repositoryMonitor);
+            arrivalTerminalTransferQuayMonitor = new ArrivalTerminalTransferQuay(repositoryMonitor, N, T);
 
             baggageReclaimOfficeMonitor = new BaggageReclaimOffice(repositoryMonitor);
-            baggageCollectionPointMonitor = new BaggageCollectionPoint(repositoryMonitor);
+            baggageCollectionPointMonitor = new BaggageCollectionPoint(repositoryMonitor, N);
 
             departureTerminalEntranceMonitor = new DepartureTerminalEntrance(repositoryMonitor,arrivalTerminalExitMonitor, N);
             departureTerminalTransferQuayMonitor = new DepartureTerminalTransferQuay(repositoryMonitor);
@@ -111,7 +112,7 @@ public class SDAirportRhapsody {
             // starting entities
                 //PASSENGERS
             for(int i=0; i<N; i++){
-                    passengers[i] = new PassengerThread(i,numberOfPassengerLuggageAtStart,(ALPassenger)arrivalLoungeMonitor, (ATEPassenger)arrivalTerminalExitMonitor, (ATTQPassenger)arrivalTerminalTransferQuayMonitor, (BCPPassenger)baggageCollectionPointMonitor,(DTEPassenger)departureTerminalEntranceMonitor,(DTTQPassenger)departureTerminalTransferQuayMonitor, (BROPassenger)baggageReclaimOfficeMonitor);
+                    passengers[i] = new PassengerThread(i,numberOfPassengerLuggageAtStart,PassengerThread.PassengerAndBagSituations.TRT,(ALPassenger)arrivalLoungeMonitor, (ATEPassenger)arrivalTerminalExitMonitor, (ATTQPassenger)arrivalTerminalTransferQuayMonitor, (BCPPassenger)baggageCollectionPointMonitor,(DTEPassenger)departureTerminalEntranceMonitor,(DTTQPassenger)departureTerminalTransferQuayMonitor, (BROPassenger)baggageReclaimOfficeMonitor);
                 }
                  //BUS DRIVER
             for(int i=0; i<NUMBER_OF_BUS_DRIVERS; i++){
@@ -137,19 +138,6 @@ public class SDAirportRhapsody {
         }  
     }
     
-    
-    private static String [] bi_to_uni (String[][] S)
-    {
-          String[] ret = new String[S.length * S[0].length];
-            int pos = 0;
-             for(int id=0;id<S.length; id++) {
-                  for(int flight=0;flight<S[id].length; flight++) {
-                        ret[pos++] = S[id][flight];
-                 }
-            }
-            return ret;
-
-    }
     private static void piecesOfLuggage(){
         for (int land = 0; land < K; land++){
             nT = 0;

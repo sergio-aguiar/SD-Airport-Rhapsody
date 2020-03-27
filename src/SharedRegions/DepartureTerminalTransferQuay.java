@@ -7,18 +7,34 @@ import Interfaces.DTTQPassenger;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
+/**
+ * Departure Terminal Tranfer Quay. Used by passenger and bus driver.
+ * @author sergiaguiar
+ * @author marcomacedo
+ */
 public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriver {
 
     private final ReentrantLock reentrantLock;
     private final Condition passengerCondition;
     private final Condition busDriverCondition;
-
+    
+    /**
+     * Number of passengers that arrived.
+     */
     private int passengersThatArrived;
+    /**
+     * Number of passengers that lef the bus.
+     */
     private int passengersThatLeftTheBus;
-
+    /**
+     * Instance of the repository.
+     */
     private final Repository repository;
-
+    
+    /**
+     * Departure Terminal Tranfer Quay constructor.
+     * @param repository repository.
+     */
     public DepartureTerminalTransferQuay(Repository repository) {
         this.reentrantLock = new ReentrantLock(true);
         this.passengerCondition = this.reentrantLock.newCondition();
@@ -27,7 +43,11 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
         this.passengersThatLeftTheBus = 0;
         this.repository = repository;
     }
-
+    
+    /**
+     * Bus Driver method: The bus driver go to arrival terminal.
+     * @param bid bus driver id.
+     */
     @Override
     public void goToArrivalTerminal(int bid) {
         this.reentrantLock.lock();
@@ -41,7 +61,12 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
             this.reentrantLock.unlock();
         }
     }
-
+    
+    /**
+     * Passenger method: The Passenger leaves the bus.
+     * @param pid passenger id.
+     * @param seat  Bus seat.
+     */
     @Override
     public void leaveTheBus(int pid, int seat) {
         this.reentrantLock.lock();
@@ -56,7 +81,12 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
             this.reentrantLock.unlock();
         }
     }
-
+    
+    /**
+     * Bus driver method: the bus driver parks the bus and let the passegers off.
+     * @param bid Bus Driver id.
+     * @param passengersThatArrived number of passengers that arrived.
+     */
     @Override
     public void parkTheBusAndLetPassOff(int bid, int passengersThatArrived) {
         this.reentrantLock.lock();

@@ -12,26 +12,56 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Arrival Lounge: Where the Passenger arrives and the Porter stays.
  * Used by PORTER and PASSENGER.
- * @author sergiaguiar.
+ * @author sergiaguiar
  * @author marcomacedo
  */
 public class ArrivalLounge implements ALPassenger, ALPorter {
 
     private final ReentrantLock reentrantLock;
     private final Condition porterCondition;
-
+    
+    /**
+     * Number of total passengers.
+     */
     private final int totalPassengers;
+    /**
+     * Number of Passengers that arrived at airport.
+     */
     private int passengersThatArrived;
-
+    /**
+     * Flight number.
+     */
     private int flightNumber;
-
+    
+    /**
+     * Array of luggage number per flight.
+     */
     private final int[] luggageNumberPerFlight;
+    
+    /**
+     * Lugagge per flight.
+     */
     private final Bag[][] luggagePerFlight;
+    
+    /**
+     * Stack with Bags in the plane.
+     */
     private Stack<Bag> bagsInThePlane;
+    /**
+     * Number of luggage picked up.
+     */
     private int luggagePickedUp;
-
+    /**
+     * Instace of the Repository.
+     */
     private final Repository repository;
-
+    /**
+     * Arrival Lounge constructor.
+     * @param repository repository.
+     * @param totalPassengers Number os total passengers.
+     * @param luggageNumberPerFlight Luggage number per flight.
+     * @param luggagePerFlight Luggage per flight.
+     */
     public ArrivalLounge(Repository repository, int totalPassengers, int[] luggageNumberPerFlight,
                          Bag[][] luggagePerFlight) {
         this.reentrantLock = new ReentrantLock();
@@ -46,13 +76,19 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.luggagePickedUp = 0;
         this.repository = repository;
     }
-
+    /**
+     * Bag array to Stack.
+     * @param flightNumber Flight number.
+     */
     private void bagArrayToStack(int flightNumber) {
         for(int i = 0; i < this.luggagePerFlight[this.flightNumber].length; i++)
             if(this.luggagePerFlight[this.flightNumber][i] != null)
                 this.bagsInThePlane.push(this.luggagePerFlight[this.flightNumber][i]);
     }
-
+    
+    /**
+     * Incremet the flight number to the next flight.
+     */
     public void nextFlight() {
         this.flightNumber++;
         this.bagArrayToStack(this.flightNumber);
@@ -86,7 +122,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.passengersThatArrived++;
         if(this.passengersThatArrived == this.totalPassengers) this.porterCondition.signal();
     }
-	 /**
+    /**
      * Porter method: the Porter tries to collect a Bag.
      * @param pid Porter id.
      * @return 
@@ -100,7 +136,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.repository.porterTryCollectingBagFromPlane(false);
         return null;
     }
-	 /**
+    /**
      * Passenger method: the Passenger goes collect a bag.
      * @param pid Passenger id.
      */
