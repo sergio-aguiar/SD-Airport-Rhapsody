@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 
 
 /**
- *
+ * 
  * @author marcomacedo
  */
 public class SDAirportRhapsody {
@@ -34,15 +34,15 @@ public class SDAirportRhapsody {
     /**
      * @param args the command line arguments
      */
-    private static final int K        = 5;
-    private static final int N      = 6;
+    private static final int K      = 2;
+    private static final int N      = 3;
     private static final int M      = 2;
     private static final int T      = 3;
  
     private static final int NUMBER_OF_BUS_DRIVERS         = 1;
     private static final int NUMBER_OF_PORTERS             = 1;
     
-    private static final int flight_number                 = 0; 
+    private static final int flightNumber                 = 0; 
     private static final int busSeatNumber                 = 0;
     private static final int numberOfPassengerLuggageAtStart   = 0;
    
@@ -50,15 +50,22 @@ public class SDAirportRhapsody {
     private static BusDriverThread[] busDrivers;
     private static PorterThread[] porters;
     
-    private static String[][] pStat;
-    private static int[][] nBags;
-    private static int [][] nBagsMissing;
+    private static final String[][] pStat = new String[N][K];
+    /**
+     * Array bidimensional of Bags with passengers and landings.
+     */
+    private static final int[][] nBags = new int[N][K];
+    /**
+     * Array bidimensional of Bags missing with bags and landings.
+     */
+    private static final int [][] nBagsMissing = new int[N][K];
     private static int nT;
-    private static int[] nTotal;
+    private static final int[] nTotal = new int[K];
     private static String[] passengerSituations;
     private static Stack <Bag> bags;
+  
     
-    private static PassengerThread.PassengerStates[] passengerStates = new PassengerThread.PassengerStates[N];
+    private static final PassengerThread.PassengerStates[] passengerStates = new PassengerThread.PassengerStates[N];
     
     private static ArrivalLounge arrivalLoungeMonitor;
     private static ArrivalTerminalExit arrivalTerminalExitMonitor;
@@ -76,22 +83,27 @@ public class SDAirportRhapsody {
         // creating entity arrays
         
         try{
+            piecesOfLuggage();
+            passengerSituations = bi_to_uni(pStat);
+            System.out.println(Arrays.toString(passengerSituations));  
+            
+         
             passengers = new PassengerThread[N];
             busDrivers = new BusDriverThread[NUMBER_OF_BUS_DRIVERS];
             porters = new PorterThread[NUMBER_OF_PORTERS];
-            
+        
             // creating Logger
-            repositoryMonitor = new Repository(numberOfPassengerLuggageAtStart, flight_number,busSeatNumber, N, bags, passengerSituations);
-            // creating monitors
+            repositoryMonitor = new Repository(numberOfPassengerLuggageAtStart, flightNumber,busSeatNumber, N, bags, passengerSituations);
 
-            arrivalLoungeMonitor = new ArrivalLounge(repositoryMonitor);
-            arrivalTerminalExitMonitor = new ArrivalTerminalExit(repositoryMonitor);
+            // creating monitors
+            arrivalLoungeMonitor = new ArrivalLounge(repositoryMonitor, N, nTotal, nBags);
+            arrivalTerminalExitMonitor = new ArrivalTerminalExit(repositoryMonitor, departureTerminalEntranceMonitor,N);
             arrivalTerminalTransferQuayMonitor = new ArrivalTerminalTransferQuay(repositoryMonitor);
 
             baggageReclaimOfficeMonitor = new BaggageReclaimOffice(repositoryMonitor);
             baggageCollectionPointMonitor = new BaggageCollectionPoint(repositoryMonitor);
 
-            departureTerminalEntranceMonitor = new DepartureTerminalEntrance(repositoryMonitor);
+            departureTerminalEntranceMonitor = new DepartureTerminalEntrance(repositoryMonitor,arrivalTerminalExitMonitor, N);
             departureTerminalTransferQuayMonitor = new DepartureTerminalTransferQuay(repositoryMonitor);
 
             temporaryStorageAreaMonitor = new TemporaryStorageArea(repositoryMonitor);
@@ -119,15 +131,25 @@ public class SDAirportRhapsody {
             for(BusDriverThread b : busDrivers) {b.join();}
             for(PorterThread p : porters) {p.join();}
 
-             
-
-        } catch (InterruptedException ex) {
+           
+        } catch (InterruptedException | IOException ex) {
              Logger.getLogger(SDAirportRhapsody.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(SDAirportRhapsody.class.getName()).log(Level.SEVERE, null, ex);
         }  
     }
     
+    
+    private static String [] bi_to_uni (String[][] S)
+    {
+          String[] ret = new String[S.length * S[0].length];
+            int pos = 0;
+             for(int id=0;id<S.length; id++) {
+                  for(int flight=0;flight<S[id].length; flight++) {
+                        ret[pos++] = S[id][flight];
+                 }
+            }
+            return ret;
+
+    }
     private static void piecesOfLuggage(){
         for (int land = 0; land < K; land++){
             nT = 0;
@@ -137,7 +159,7 @@ public class SDAirportRhapsody {
                 
                 // Passenger State
                 if((Math.random() < 0.4))
-                    pStat[nP][land] = "FDT";
+                    pStat[nP][land] = "FDT";     
                 else
                     pStat[nP][land] = "TRT";
                 
@@ -149,7 +171,7 @@ public class SDAirportRhapsody {
                 else 
                      nBags[nP][land] = 0;
                 
-                if(pStat[nP][land]== "TRT" || nBags[nP][land] == 0)
+                if("TRT".equals(pStat[nP][land]) || nBags[nP][land] == 0)
                     nBagsMissing[nP][land] = nBags[nP][land];      // no missing bags
                 else if (Math.random() < 0.5)
                      nBagsMissing[nP][land] = nBags[nP][land] - 1; //passenfer lost 1 bag
@@ -157,8 +179,14 @@ public class SDAirportRhapsody {
                 nT += nBags[nP][land];
             }
         nTotal[land] = nT;                                          // number of bags per plane
+       System.out.println(Arrays.deepToString(pStat));
+
         }
     }
+
+
+    
+    
 }   
     
     
