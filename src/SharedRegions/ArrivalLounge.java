@@ -9,7 +9,12 @@ import Interfaces.ALPorter;
 import java.util.Stack;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
+/**
+ * Arrival Lounge: Where the Passenger arrives and the Porter stays.
+ * Used by PORTER and PASSENGER.
+ * @author sergiaguiar.
+ * @author marcomacedo
+ */
 public class ArrivalLounge implements ALPassenger, ALPorter {
 
     private final ReentrantLock reentrantLock;
@@ -52,7 +57,13 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.flightNumber++;
         this.bagArrayToStack(this.flightNumber);
     }
-
+	  
+    /** 
+     * Porter method: The porter takes a rest.
+     * 
+     * @param pid Poter id.
+     * @return true if take a rest or false otherwise.
+     */
     @Override
     public boolean takeARest(int pid) {
         boolean done = false;
@@ -66,13 +77,20 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         }
         return done;
     }
-
+	/**
+     * Passenger method: the passenger is in Transit or Final destination.
+     * @param pid Passenger id.
+     */
     @Override
     public void whatShouldIDo(int pid) {
         this.passengersThatArrived++;
         if(this.passengersThatArrived == this.totalPassengers) this.porterCondition.signal();
     }
-
+	 /**
+     * Porter method: the Porter tries to collect a Bag.
+     * @param pid Porter id.
+     * @return 
+     */
     @Override
     public String tryToCollectABag(int pid) {
         this.repository.setPorterState(pid, PorterThread.PorterStates.AT_THE_PLANES_HOLD);
@@ -80,7 +98,10 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
             return this.bagsInThePlane.pop().toString();
         return null;
     }
-
+	 /**
+     * Passenger method: the Passenger goes collect a bag.
+     * @param pid Passenger id.
+     */
     @Override
     public void goCollectABag(int pid) {
         this.reentrantLock.lock();
