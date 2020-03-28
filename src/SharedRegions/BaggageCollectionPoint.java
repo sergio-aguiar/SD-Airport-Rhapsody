@@ -34,7 +34,7 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
     public BaggageCollectionPoint(Repository repository, int totalPassengers) {
         this.reentrantLock = new ReentrantLock(true);
         this.passengerLuggageConditions = new Condition[totalPassengers];
-        for(Condition c : this.passengerLuggageConditions) c = this.reentrantLock.newCondition();
+        for(int c = 0; c < totalPassengers; c++) this.passengerLuggageConditions[c] = this.reentrantLock.newCondition();
         this.bcpBags = new ArrayList<>();
         this.repository = repository;
     }

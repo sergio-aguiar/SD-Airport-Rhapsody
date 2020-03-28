@@ -139,21 +139,33 @@ public class PassengerThread extends Thread {
      */
     @Override
     public void run() {
+        System.out.println("PASSENGER " + this.pid + " STARTING!");
         this.alPassenger.whatShouldIDo(this.pid);
         if(this.passengerSituation.toString().equals(PassengerAndBagSituations.FDT.toString())) {
+            System.out.println("PASSENGER " + this.pid + " CHECKING IF HE HAS BAGS TO COLLECT!");
             if(this.luggageAtStart != 0) {
+                System.out.println("PASSENGER " + this.pid + " GOING TO COLLECT A BAG!");
                 this.alPassenger.goCollectABag(this.pid);
+                System.out.println("PASSENGER " + this.pid + " TRYING TO COLLECT A BAG!");
                 while(this.bcpPassenger.goCollectABag(this.pid)) {
                     this.currentLuggage++;
                 }
-                if(this.currentLuggage != this.luggageAtStart)
+                System.out.println("PASSENGER " + this.pid + " CHECKING IF BAGS MISSING!");
+                if(this.currentLuggage != this.luggageAtStart) {
+                    System.out.println("PASSENGER " + this.pid + " REPORTING MISSING BAGS!");
                     this.broPassenger.reportMissingBags(this.pid, this.luggageAtStart - this.currentLuggage);
+                }
             }
+            System.out.println("PASSENGER " + this.pid + " GOING HOME!");
             this.atePassenger.goHome(this.pid);
         } else {
+            System.out.println("PASSENGER " + this.pid + " TAKING THE BUS!");
             this.attqPassenger.takeABus(this.pid);
+            System.out.println("PASSENGER " + this.pid + " ENTERING THE BUS!");
             this.busSeat = this.attqPassenger.enterTheBus(this.pid);
+            System.out.println("PASSENGER " + this.pid + " LEAVING THE BUS!");
             this.dttqPassenger.leaveTheBus(this.pid, this.busSeat);
+            System.out.println("PASSENGER " + this.pid + " PREPARING THE NEXT LEG!");
             this.dtePassenger.prepareNextLeg(this.pid);
         }
     }
