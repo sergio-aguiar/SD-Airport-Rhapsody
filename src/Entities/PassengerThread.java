@@ -27,6 +27,11 @@ public class PassengerThread extends Thread {
         PassengerStates(String description) {
             this.description = description;
         }
+        
+        @Override
+        public String toString(){
+            return this.description;
+        }
     }
 	/**
      * Enumerate with the Passenger and Bag Situations.

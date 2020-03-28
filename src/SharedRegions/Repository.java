@@ -76,6 +76,7 @@ public class Repository {
         this.writer.write("St1 Si1 NR1 NA1 St2 Si2 NR2 NA2 St3 Si3 NR3 NA3 St4 Si4 NR4 NA4 St5 Si5 NR5 NA5 St6 Si6 NR6 NA6 \n");
 
         log();
+        //finalReport();
     }
 
     private boolean close() {
@@ -89,19 +90,49 @@ public class Repository {
     }
     
     private void log() {
+        
         String line = "";
         //Plane number + number of luggage at the planes
-        line += this.flightNumber + " " + this.numberOfLuggageAtThePlane + "   ";
-        // Porter states
-        line += this.porterState + " ";
+        line += " " + this.flightNumber + "  " + this.numberOfLuggageAtThePlane + "  ";
+        // Porter states +  number of pieces of luggage presently on the conveyor belt + number of pieces of luggage belonging to passengers in transit presently stored at the storeroom
+        line += this.porterState.toString() + "  " + this.numberOfLuggageOnConveyor + "  " + numberOfLuggageAtTheStoreRoom + "   ";
         
+        line += this.busDriverState.toString() + "   ";
+        for(int i = 0; i < 6; i++)
+            line += this.busWaitingQueue[i] + "  " ;
+        
+        line += "  ";
+        for(int i = 0; i <3; i++)
+            line += this.busSeats[i] + "  ";
+        
+        line += "\n";
+        for(int i = 0; i<6; i++){
+            line += this.passengerStates[i].toString() + " " + this.passengerSituations[i].toString() + "  " + this.passengerLuggageAtStart[i] + "   " + this.passengerLuggageCollected[i] + "  "; 
+        }
+       // line += "\n";   
+
         try {
             this.writer.write((line + "\n"));
+            this.writer.flush();
         } catch (IOException ex) {
             Logger.getLogger(Repository.class.getName()).log(Level.SEVERE, null, ex);
         }
+       
     }
-
+    
+    private void finalReport (){   
+        String finalReport = "";      
+        finalReport += "Final Report";
+        finalReport += "N. of passengers which have this airport as their final destination = " + this.numberOfFDTPassengers + "\n";
+        finalReport += "N. of passengers in transit = "+ this.numberOfTRTPassengers + "\n";
+        finalReport += "N. of bags that should have been transported in the the planes hold = " + this.numberOfBagsThatShouldHaveBeenTransported + "\n";
+        finalReport += "N. of bags that were lost = " + this.numberOfBagsThatWereLost + "\n";
+        try {
+            this.writer.write((finalReport + "\n"));
+        } catch (IOException ex) {
+            Logger.getLogger(Repository.class.getName()).log(Level.SEVERE, null, ex);
+        }     
+    }
     private void calculatePassengerSituations() {
         for(PassengerThread.PassengerAndBagSituations situation : this.passengerSituations)
             if(situation.toString().equals("TRT")) this.numberOfTRTPassengers++;
