@@ -54,7 +54,14 @@ public class DepartureTerminalEntrance implements DTEPassenger {
      * Sginal the waiting passsengers.
      */
     public void signalWaitingPassengers() {
-        this.passengerCondition.signalAll();
+        this.reentrantLock.lock();
+        try {
+            this.passengerCondition.signalAll();
+        } catch (Exception e) {
+            System.out.print("DTE: signalWaitingPassengers: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void setAte(ArrivalTerminalExit ate) {

@@ -61,7 +61,14 @@ public class ArrivalTerminalExit implements ATEPassenger {
      * Signal waiting passengers.
      */
     public void signalWaitingPassengers() {
-        this.passengerCondition.signalAll();
+        this.reentrantLock.lock();
+        try {
+            this.passengerCondition.signalAll();
+        } catch (Exception e) {
+            System.out.print("ATE: signalWaitingPassengers: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
 

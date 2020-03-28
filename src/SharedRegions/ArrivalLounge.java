@@ -83,7 +83,8 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     private void bagArrayToStack(int flightNumber) {
         for(int i = 0; i < this.luggagePerFlight[flightNumber].length; i++)
             for(int j = 0; j < this.luggagePerFlight[flightNumber][i].length; j++)
-                this.bagsInThePlane.push(this.luggagePerFlight[flightNumber][i][j]);
+                if(this.luggagePerFlight[flightNumber][i][j] != null)
+                    this.bagsInThePlane.push(this.luggagePerFlight[flightNumber][i][j]);
     }
     
     /**
@@ -141,8 +142,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         try {
             if(this.luggageNumberPerFlight[this.flightNumber] != this.luggagePickedUp) {
                 this.repository.porterTryCollectingBagFromPlane(true);
-                System.out.println("Luggage per flight: " + this.luggageNumberPerFlight[this.flightNumber] + " , Picked up: " + this.luggagePickedUp);
-                returnVal = this.bagsInThePlane.pop().toString();
+                if(!this.bagsInThePlane.isEmpty()) returnVal = this.bagsInThePlane.pop().toString();
             }
             this.repository.porterTryCollectingBagFromPlane(false);
         } catch (Exception e) {
