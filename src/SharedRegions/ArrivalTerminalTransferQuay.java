@@ -175,7 +175,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
             }
             if(this.passengersSignaled > 0) this.busDriverCondition.await();
         } catch (Exception e) {
-            System.out.print(e.toString());
+            System.out.println("ATTQ: announcingBusBoarding: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -199,7 +199,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
             if(this.passengersSignaled == 0)
                 this.busDriverCondition.signal();
         } catch (Exception e) {
-            System.out.print(e.toString());
+            System.out.println("ATTQ: enterTheBus: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -226,7 +226,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
             this.passengersInBus = 0;
             this.repository.busDriverParkingTheBus();
         } catch (Exception e) {
-            System.out.print(e.toString());
+            System.out.print("ATTQ: parkTheBus: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -247,7 +247,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
             this.repository.passengerTakingABus(pid);
             this.busQueueCondition.await();
         } catch (Exception e) {
-            System.out.print(e.toString());
+            System.out.print("ATTQ: takeABus: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -266,7 +266,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
             this.repository.busDriverGoingToDepartureTerminal();
             busPassengers = this.numberOfPassengersInBus();
         } catch (Exception e) {
-            System.out.print(e.toString());
+            System.out.println("ATTQ: goToDepartureTerminal: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }

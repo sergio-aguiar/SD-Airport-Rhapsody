@@ -38,7 +38,7 @@ public class BaggageReclaimOffice implements BROPassenger {
         try {
             this.repository.passengerReportingMissingBags(pid, missingBags);
         } catch (Exception e) {
-            System.out.print(e.toString());
+            System.out.println("BRO: reportMissingBags: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }

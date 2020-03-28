@@ -53,7 +53,7 @@ public class TemporaryStorageArea implements TSAPorter {
             this.repository.porterCarryBagToTemporaryStorageArea();
             this.tsaBags.add(bagID);
         } catch (Exception e) {
-            System.out.print(e.toString());
+            System.out.println("TSA: carryItToAppropriateStore: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }

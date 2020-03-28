@@ -4,7 +4,7 @@ import Interfaces.*;
 
 
 /**
- * Passenger Thread: implements the life-cycle of the Passenger.
+ * Passenger Thread: executes the Passenger's life-cycle.
  * @author sergioaguiar
  * @author marcomacedo
  */
@@ -29,9 +29,9 @@ public class PassengerThread extends Thread {
         }
     }
 	/**
-     * Enumerate with the Passenger and Bag Situations states.
-	 * TRT: if passenger is in Transit.
-	 * FDT: if final destination.
+     * Enumerate with the Passenger and Bag Situations.
+	 * TRT: if the Passenger is in Transit (has additional flight legs).
+	 * FDT: if the Passenger has reached their final destination.
      */
     public enum PassengerAndBagSituations {
         TRT("TRT"),
@@ -50,22 +50,22 @@ public class PassengerThread extends Thread {
     }
 
     /**
-     * Passanger id.
+     * Passenger's ID.
      */
     private final int pid;
     
     /**
-     * Passenger luggage at start.
+     * Passenger's number of luggage at the start.
      */
     private final int luggageAtStart;
     
     /**
-     * Passanger current luggage.
+     * Passenger's currently collected luggage.
      */
     private int currentLuggage;
 	
 	/**
-     * Passenger bag and situation state.
+     * Passenger's flight situation.
      */
     private final PassengerAndBagSituations passengerSituation;
 
@@ -75,46 +75,46 @@ public class PassengerThread extends Thread {
     private int busSeat;
 
     /**
-     * Instance of the Passenger Arrival Lounge interface.
+     * Instance of the Passenger's Arrival Lounge interface.
      */
     private final ALPassenger alPassenger;
     /**
-     * Instance of the Passenger Arrival Terminal Exit interface.
+     * Instance of the Passenger's Arrival Terminal Exit interface.
      */
     private final ATEPassenger atePassenger;
     /**
-     * Instance of the Passenger Arrival Terminal Transfer Quay interface.
+     * Instance of the Passenger's Arrival Terminal Transfer Quay interface.
      */
     private final ATTQPassenger attqPassenger;
     /**
-     * Instance of the Passenger Baggage Collection Point interface.
+     * Instance of the Passenger's Baggage Collection Point interface.
      */
     private final BCPPassenger bcpPassenger;
     /**
-     * Instance of the Passenger Departure Terminal Entrance interface.
+     * Instance of the Passenger's Departure Terminal Entrance interface.
      */
     private final DTEPassenger dtePassenger;
     /**
-     * Instance of the Passenger Departure Terminal Transfer Quay interface.
+     * Instance of the Passenger's Departure Terminal Transfer Quay interface.
      */
     private final DTTQPassenger dttqPassenger;
     /**
-     * Instance of the Passenger Baggage Reclaim Office interface.
+     * Instance of the Passenger's Baggage Reclaim Office interface.
      */
     private final BROPassenger broPassenger;
 	
 	 /**
-     * Constructor: Passanger
-     * @param id Passenger id.
-     * @param luggageAtStart Passanger luggage at start
-     * @param al Passenger Arrival Lounge interface.
-     * @param ate Passenger Arrival Terminal Exit interface.
-     * @param attq Passenger Arrival Terminal Transfer Quay interface.
-     * @param bcp Passenger Baggage Collection Point interface
-     * @param dte Passenger Departure Terminal Entrance interface.
-     * @param dttq Passenger Departure Terminal Transfer Quay interface.
-     * @param bro Passenger Baggage Reclaim Office interface.
-     * @param situation Passenger situation.
+      * Constructor: Passenger
+      * @param id Passenger's ID.
+      * @param luggageAtStart Passenger's number of luggage at the start.
+      * @param situation Passenger's flight situation.
+      * @param al Passenger's Arrival Lounge interface.
+      * @param ate Passenger's Arrival Terminal Exit interface.
+      * @param attq Passenger's Arrival Terminal Transfer Quay interface.
+      * @param bcp Passenger's Baggage Collection Point interface
+      * @param dte Passenger's Departure Terminal Entrance interface.
+      * @param dttq Passenger's Departure Terminal Transfer Quay interface.
+      * @param bro Passenger's Baggage Reclaim Office interface.
      */
     public PassengerThread(int id, int luggageAtStart, PassengerAndBagSituations situation, ALPassenger al,
                            ATEPassenger ate, ATTQPassenger attq, BCPPassenger bcp, DTEPassenger dte, DTTQPassenger dttq,
@@ -135,7 +135,7 @@ public class PassengerThread extends Thread {
     }
 	
 	/**
-     * Implements the life cycle of the Passanger.
+     * Execute's the passenger's life-cycle.
      */
     @Override
     public void run() {

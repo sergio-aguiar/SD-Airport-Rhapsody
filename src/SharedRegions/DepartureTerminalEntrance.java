@@ -25,7 +25,7 @@ public class DepartureTerminalEntrance implements DTEPassenger {
     /**
      * Instance of Arrival Terminal Exit.
      */
-    private final ArrivalTerminalExit ate;
+    private ArrivalTerminalExit ate;
     /**
      * Instance of Repository.
      */
@@ -34,15 +34,13 @@ public class DepartureTerminalEntrance implements DTEPassenger {
     /**
      * Departure Terminal Entrance constructor.
      * @param repository repository
-     * @param ate arrival terminal exit.
      * @param totalPassengers number of total passengers.
      */
-    public DepartureTerminalEntrance(Repository repository, ArrivalTerminalExit ate, int totalPassengers) {
+    public DepartureTerminalEntrance(Repository repository, int totalPassengers) {
         this.reentrantLock = new ReentrantLock(true);
         this.passengerCondition = this.reentrantLock.newCondition();
         this.totalPassengers = totalPassengers;
         this.waitingPassengers = 0;
-        this.ate = ate;
         this.repository = repository;
     }
     /**
@@ -58,6 +56,11 @@ public class DepartureTerminalEntrance implements DTEPassenger {
     public void signalWaitingPassengers() {
         this.passengerCondition.signalAll();
     }
+
+    public void setAte(ArrivalTerminalExit ate) {
+        this.ate = ate;
+    }
+
     /**
      * Passenger method: The passenger prepares the nex leg of the journey.
      * @param pid passenger id.
@@ -75,7 +78,7 @@ public class DepartureTerminalEntrance implements DTEPassenger {
             }
             else this.passengerCondition.await();
         } catch (Exception e) {
-            System.out.print(e.toString());
+            System.out.print("DTE: prepareNextLeg: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }

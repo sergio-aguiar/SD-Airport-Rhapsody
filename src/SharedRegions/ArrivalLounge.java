@@ -107,7 +107,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         try {
             this.porterCondition.await();
         } catch (Exception e) {
-            System.out.print(e.toString());
+            System.out.println("AL: takeARest: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -119,8 +119,15 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
      */
     @Override
     public void whatShouldIDo(int pid) {
-        this.passengersThatArrived++;
-        if(this.passengersThatArrived == this.totalPassengers) this.porterCondition.signal();
+        this.reentrantLock.lock();
+        try {
+            this.passengersThatArrived++;
+            if(this.passengersThatArrived == this.totalPassengers) this.porterCondition.signal();
+        } catch (Exception e) {
+            System.out.println("AL: whatShouldIDo: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
     /**
      * Porter method: the Porter tries to collect a Bag.
@@ -129,12 +136,21 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
      */
     @Override
     public String tryToCollectABag(int pid) {
-        if(this.luggageNumberPerFlight[this.flightNumber] != this.luggagePickedUp) {
-            this.repository.porterTryCollectingBagFromPlane(true);
-            return this.bagsInThePlane.pop().toString();
+        String returnVal = "";
+        this.reentrantLock.lock();
+        try {
+            if(this.luggageNumberPerFlight[this.flightNumber] != this.luggagePickedUp) {
+                this.repository.porterTryCollectingBagFromPlane(true);
+                System.out.print("luggage per flight: " + this.luggageNumberPerFlight[this.flightNumber] + " , picked up: " + this.luggagePickedUp);
+                returnVal = this.bagsInThePlane.pop().toString();
+            }
+            this.repository.porterTryCollectingBagFromPlane(false);
+        } catch (Exception e) {
+            System.out.println("AL: tryToCollectABag: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
         }
-        this.repository.porterTryCollectingBagFromPlane(false);
-        return null;
+        return returnVal;
     }
     /**
      * Passenger method: the Passenger goes collect a bag.
@@ -146,7 +162,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         try {
             this.repository.passengerGoingToCollectABag(pid);
         } catch (Exception e) {
-            System.out.print(e.toString());
+            System.out.println("AL: goCollectABag: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }

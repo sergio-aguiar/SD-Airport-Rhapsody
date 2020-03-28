@@ -56,7 +56,7 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
             this.passengersThatLeftTheBus = 0;
             this.repository.busDriverGoingToArrivalTerminal();
         } catch(Exception e) {
-            System.out.print(e.toString());
+            System.out.println("DTTQ: goToArrivalTerminal: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -76,7 +76,7 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
             if(this.passengersThatLeftTheBus == this.passengersThatArrived) this.busDriverCondition.signal();
             this.repository.passengerLeavingTheBus(pid, seat);
         } catch(Exception e) {
-            System.out.print(e.toString());
+            System.out.println("DTTQ: leaveTheBus: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -96,7 +96,7 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
             this.passengerCondition.signalAll();
             this.busDriverCondition.await();
         } catch(Exception e) {
-            System.out.print(e.toString());
+            System.out.println("DTTQ: parkTheBusAndLetPassOff: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }

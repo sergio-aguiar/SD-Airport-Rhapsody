@@ -4,14 +4,14 @@ import Interfaces.ATTQBusDriver;
 import Interfaces.DTTQBusDriver;
 
 /**
-* BusDriver Thread: implements the life-cycle of the Bus Driver.
+* BusDriver Thread: executes the Bus Driver's life-cycle.
 * 
 * @author marcomacedo
 * @author sergioaguiar
 */
 public class BusDriverThread extends Thread {
-	  /**
-     * Enumerate with the Bus Driver states.
+    /**
+     * Enumerate with all possible Bus Driver states.
      */
     public enum BusDriverStates {
         PARKING_AT_THE_ARRIVAL_TERMINAL("paat"),
@@ -27,31 +27,31 @@ public class BusDriverThread extends Thread {
     }
 	
     /**
-     * Bus Driver id.
+     * Bus Driver's ID.
      */
     private final int bid;
     
     /**
-     * Instance of the Bus Driver Arrival Terminal Transfer Quay interface.
+     * Instance of the Bus Driver's Arrival Terminal Transfer Quay interface.
      */
     private final ATTQBusDriver attqBusDriver;
     
      /**
-     * Instance of the Bus Driver Departure Terminal Transfer Quay interface.
+     * Instance of the Bus Driver's Departure Terminal Transfer Quay interface.
      */
     private final DTTQBusDriver dttqBusDriver;
 
 	/**
-     * Number of passengers being taken.
+     * Number of passengers being taken in the bus.
      */
     private int passengersBeingTaken;
 	
 	 
     /**
      * Constructor: Bus Driver
-     * @param bid Busdriver id.
-     * @param attq Bus Diver Arrival Terminal Tranfer Quay Interface.
-     * @param dttq Bus Diver Departure Terminal Tranfer Quay Interface.
+     * @param bid Bus Driver's ID.
+     * @param attq Bus Driver's Arrival Terminal Transfer Quay Interface.
+     * @param dttq Bus Driver's Departure Terminal Transfer Quay Interface.
      */
     public BusDriverThread(int bid, ATTQBusDriver attq, DTTQBusDriver dttq) {
         this.bid = bid;
@@ -60,7 +60,7 @@ public class BusDriverThread extends Thread {
         this.passengersBeingTaken = 0;
     }
 	/**
-     * Implements the life cycle of the Bus Driver.
+     * Executes the Bus Driver's life-cycle.
      */
     @Override
     public void run() {

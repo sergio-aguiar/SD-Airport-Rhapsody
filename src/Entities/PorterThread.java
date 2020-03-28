@@ -5,7 +5,7 @@ import Interfaces.BCPPorter;
 import Interfaces.TSAPorter;
 
 /**
- * Porter Thread: implements the life-cycle of the Porter.
+ * Porter Thread: execute's the Porter's life-cycle.
  * @author sergioaguiar
  * @author marcomacedo
  */
@@ -26,31 +26,31 @@ public class PorterThread extends Thread {
         }
     }
     /**
-     * Bag Data.
+     * Current Bag's Data.
      */
     private String[] bagData;
     /**
-     * Porter id.
+     * Porter's ID.
      */
     private final int pid;
     /**
-     * Instance of Porter the Arrival Lounge interface.
+     * Instance of the Porter's the Arrival Lounge interface.
      */
     private final ALPorter alPorter;
     /**
-     * Instance of the Porter Baggage Collection Point interface.
+     * Instance of the Porter's Baggage Collection Point interface.
      */
     private final BCPPorter bcpPorter;
     /**
-     * Instance of the Porter Temporary Storage Area interface.
+     * Instance of the Porter's Temporary Storage Area interface.
      */
     private final TSAPorter tsaPorter;
     /**
      * 
-     * @param pid Porter id.
-     * @param al Porter Arrival Lounge interface.
-     * @param bcp Porter Baggage Collection Point interface.
-     * @param tsa Porter Temporary Storage Area.
+     * @param pid Porter's ID.'
+     * @param al Porter's Arrival Lounge interface.
+     * @param bcp Porter's Baggage Collection Point interface.
+     * @param tsa Porter's Temporary Storage Area interface.
      */
      public PorterThread(int pid, ALPorter al, BCPPorter bcp, TSAPorter tsa) {
         this.pid = pid;
@@ -60,18 +60,19 @@ public class PorterThread extends Thread {
         this.tsaPorter = tsa;
     }
     /**
-     * Implements the life cycle of the Porter.
+     * Executes the Porter's life-cycle.
      */
    @Override
     public void run() {
         while(!this.alPorter.takeARest(this.pid)) {
-            this.bagData = this.alPorter.tryToCollectABag(this.pid).split(",");
-            while(this.bagData[0] != null && this.bagData[1] != null) {
+            String tmpBag = this.alPorter.tryToCollectABag(this.pid);
+            while(!tmpBag.equals("")) {
+                this.bagData = tmpBag.split(",");
                 if(this.bagData[1].equals(PassengerThread.PassengerAndBagSituations.FDT.toString()))
                     this.bcpPorter.carryItToAppropriateStore(this.pid, Integer.parseInt(this.bagData[0]));
                 else
                     this.tsaPorter.carryItToAppropriateStore(this.pid, Integer.parseInt(this.bagData[0]));
-                this.bagData = this.alPorter.tryToCollectABag(this.pid).split(",");
+                tmpBag = this.alPorter.tryToCollectABag(this.pid);
             }
             this.bcpPorter.noMoreBagsToCollect(this.pid);
         }

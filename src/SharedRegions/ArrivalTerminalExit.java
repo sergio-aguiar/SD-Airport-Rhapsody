@@ -28,7 +28,7 @@ public class ArrivalTerminalExit implements ATEPassenger {
     /**
      * Instance of the Departure Terminal Entrance.
      */
-    private final DepartureTerminalEntrance dte;
+    private DepartureTerminalEntrance dte;
     /**
      * Instave of the repository.
      */
@@ -37,18 +37,19 @@ public class ArrivalTerminalExit implements ATEPassenger {
     /**
      * Arrival terminal exit constructor.
      * @param repository repository.
-     * @param dte Departure Terminal Entrance.
      * @param totalPassengers number of total passengers.
      */
-    public ArrivalTerminalExit(Repository repository, DepartureTerminalEntrance dte, int totalPassengers) {
+    public ArrivalTerminalExit(Repository repository, int totalPassengers) {
         this.reentrantLock = new ReentrantLock(true);
         this.passengerCondition = this.reentrantLock.newCondition();
         this.totalPassengers = totalPassengers;
-        this.waitingPassengers = 0;
-        this.dte = dte;
         this.repository = repository;
     }
-    
+
+    public void setDte(DepartureTerminalEntrance dte) {
+        this.dte = dte;
+    }
+
     /**
      * Get the waiting passengers.
      * @return the number of waiting passengers.
@@ -62,7 +63,9 @@ public class ArrivalTerminalExit implements ATEPassenger {
     public void signalWaitingPassengers() {
         this.passengerCondition.signalAll();
     }
-    
+
+
+
     /**
      * Passenger method: go home.
      * @param pid passenger id.
@@ -80,7 +83,7 @@ public class ArrivalTerminalExit implements ATEPassenger {
             }
             else this.passengerCondition.await();
         } catch (Exception e) {
-            System.out.print(e.toString());
+            System.out.println("ATE: goHome: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
