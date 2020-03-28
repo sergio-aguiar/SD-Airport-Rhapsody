@@ -56,7 +56,7 @@ public class AirportRhapsodyMain {
             System.out.println("Repository Error!");
         }
 
-        arrivalLoungeMonitor = new ArrivalLounge(repositoryMonitor, n, totalLuggagePerFlight, passengerBags[0]);
+        arrivalLoungeMonitor = new ArrivalLounge(repositoryMonitor, n, totalLuggagePerFlight, passengerBags);
         arrivalTerminalExitMonitor = new ArrivalTerminalExit(repositoryMonitor, n);
         arrivalTerminalTransferQuayMonitor = new ArrivalTerminalTransferQuay(repositoryMonitor, n, t);
         baggageCollectionPointMonitor = new BaggageCollectionPoint(repositoryMonitor, n);
@@ -68,6 +68,10 @@ public class AirportRhapsodyMain {
         arrivalTerminalExitMonitor.setDte(departureTerminalEntranceMonitor);
         departureTerminalEntranceMonitor.setAte(arrivalTerminalExitMonitor);
 
+
+        busDriver = new BusDriverThread(0, arrivalTerminalTransferQuayMonitor, departureTerminalTransferQuayMonitor);
+        porter = new PorterThread(0, arrivalLoungeMonitor, baggageCollectionPointMonitor, temporaryStorageAreaMonitor);
+
         for(int passenger = 0; passenger < n; passenger++) {
             passengers[passenger] = new PassengerThread(passenger, passengerLuggage[0][passenger],
                     passengerSituations[0][passenger], arrivalLoungeMonitor, arrivalTerminalExitMonitor,
@@ -75,13 +79,9 @@ public class AirportRhapsodyMain {
                     departureTerminalTransferQuayMonitor,  baggageReclaimOfficeMonitor);
         }
 
-        busDriver = new BusDriverThread(0, arrivalTerminalTransferQuayMonitor, departureTerminalTransferQuayMonitor);
-
-        porter = new PorterThread(0, arrivalLoungeMonitor, baggageCollectionPointMonitor, temporaryStorageAreaMonitor);
-
-        for(PassengerThread passengerThread : passengers) passengerThread.start();
         busDriver.start();
         porter.start();
+        for(PassengerThread passengerThread : passengers) passengerThread.start();
 
         try {
             for (PassengerThread passengerThread : passengers) passengerThread.join();

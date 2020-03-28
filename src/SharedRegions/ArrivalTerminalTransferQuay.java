@@ -41,7 +41,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
      * Number of passengers signaled to board the bus.
      */
     private int passengersSignaled;
-    
+
     /**
      * Array with the bus seat numbers.
      */
@@ -168,7 +168,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
     public void announcingBusBoarding() {
         this.reentrantLock.lock();
         try {
-            this.busDriverCondition.awaitNanos(10); //experiment with value
+            do this.busDriverCondition.awaitNanos(100); while(this.queuedPassengers == 0);
             for(int i = 0; i < this.busSeatNumber && i < this.queuedPassengers; i++) {
                 passengersSignaled++;
                 this.busQueueCondition.signal();
@@ -191,6 +191,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         int queuePosition = -1;
         this.reentrantLock.lock();
         try {
+            System.out.println("signaled: " + this.passengersSignaled);
             queuePosition = this.getOutOfQueue(pid);
             this.repository.passengerGettingOutOfTheWaitingQueue(queuePosition);
             busSeat = this.getIntoBus(pid);

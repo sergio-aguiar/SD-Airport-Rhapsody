@@ -41,7 +41,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     /**
      * Lugagge per flight.
      */
-    private final Bag[][] luggagePerFlight;
+    private final Bag[][][] luggagePerFlight;
     
     /**
      * Stack with Bags in the plane.
@@ -63,7 +63,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
      * @param luggagePerFlight Luggage per flight.
      */
     public ArrivalLounge(Repository repository, int totalPassengers, int[] luggageNumberPerFlight,
-                         Bag[][] luggagePerFlight) {
+                         Bag[][][] luggagePerFlight) {
         this.reentrantLock = new ReentrantLock();
         this.porterCondition = this.reentrantLock.newCondition();
         this.totalPassengers = totalPassengers;
@@ -81,9 +81,9 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
      * @param flightNumber Flight number.
      */
     private void bagArrayToStack(int flightNumber) {
-        for(int i = 0; i < this.luggagePerFlight[this.flightNumber].length; i++)
-            if(this.luggagePerFlight[this.flightNumber][i] != null)
-                this.bagsInThePlane.push(this.luggagePerFlight[this.flightNumber][i]);
+        for(int i = 0; i < this.luggagePerFlight[flightNumber].length; i++)
+            for(int j = 0; j < this.luggagePerFlight[flightNumber][i].length; j++)
+                this.bagsInThePlane.push(this.luggagePerFlight[flightNumber][i][j]);
     }
     
     /**
