@@ -163,6 +163,7 @@ public class PassengerThread extends Thread {
             }
             System.out.println("PASSENGER " + this.pid + " GOING HOME!");
             this.atePassenger.goHome(this.pid);
+            System.out.println("PASSENGER " + this.pid + " WENT HOME!");
         } else {
             System.out.println("PASSENGER " + this.pid + " TAKING THE BUS!");
             this.attqPassenger.takeABus(this.pid);
@@ -172,6 +173,7 @@ public class PassengerThread extends Thread {
             this.dttqPassenger.leaveTheBus(this.pid, this.busSeat);
             System.out.println("PASSENGER " + this.pid + " PREPARING THE NEXT LEG!");
             this.dtePassenger.prepareNextLeg(this.pid);
+            System.out.println("PASSENGER " + this.pid + " WENT TO THE NEXT LEG!");
         }
     }
 }

@@ -142,6 +142,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         try {
             if(this.luggageNumberPerFlight[this.flightNumber] != this.luggagePickedUp) {
                 this.repository.porterTryCollectingBagFromPlane(true);
+                System.out.println(this.bagsInThePlane.toString());
                 if(!this.bagsInThePlane.isEmpty()) returnVal = this.bagsInThePlane.pop().toString();
             }
             this.repository.porterTryCollectingBagFromPlane(false);
