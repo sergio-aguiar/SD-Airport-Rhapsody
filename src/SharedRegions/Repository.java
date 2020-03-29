@@ -179,6 +179,20 @@ public class Repository {
         this.busDriverState = busDriverState;
     }
 
+    private void removePassengerFromQueue(int pid) {
+        String[] tmpQueue = new String[this.passengersInitiated.length];
+        int found = -1;
+        for(int i = 0; i < this.passengersInitiated.length; i++) {
+            if(this.busWaitingQueue[i].equals(String.valueOf(pid))) found = i;
+            else {
+                if(found != -1) tmpQueue[i - 1] = this.busWaitingQueue[i];
+                else tmpQueue[i] = this.busWaitingQueue[i];
+            }
+        }
+        tmpQueue[this.passengersInitiated.length - 1] = "-";
+        this.busWaitingQueue = Arrays.copyOf(tmpQueue, this.passengersInitiated.length);
+    }
+
     public void porterInitiated() {
         this.reentrantLock.lock();
         try {
@@ -292,6 +306,7 @@ public class Repository {
     public void passengerEnteringTheBus(int pid, int seat) {
         this.reentrantLock.lock();
         try {
+            this.removePassengerFromQueue(pid);
             this.setPassengerState(pid, PassengerThread.PassengerStates.TERMINAL_TRANSFER);
             this.busSeats[seat] = String.valueOf(pid);
             this.log();
@@ -343,6 +358,7 @@ public class Repository {
         this.reentrantLock.lock();
         try {
             this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_DEPARTURE_TRANSFER_TERMINAL);
+            // REMOVE FROM BUS
             this.busSeats[seat] = "-";
             this.log();
         } catch (Exception e) {
@@ -356,18 +372,6 @@ public class Repository {
         this.reentrantLock.lock();
         try {
             this.busWaitingQueue[position] = String.valueOf(pid);
-            this.log();
-        } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
-        } finally {
-            this.reentrantLock.unlock();
-        }
-    }
-
-    public void passengerGettingOutOfTheWaitingQueue(int position) {
-        this.reentrantLock.lock();
-        try {
-            this.busWaitingQueue[position] = "-";
             this.log();
         } catch (Exception e) {
             System.out.print("Repository: " + e.toString());

@@ -192,12 +192,11 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         this.reentrantLock.lock();
         try {
             queuePosition = this.getOutOfQueue(pid);
-            this.repository.passengerGettingOutOfTheWaitingQueue(queuePosition);
             busSeat = this.getIntoBus(pid);
             this.passengersSignaled--;
-            this.repository.passengerEnteringTheBus(pid, this.passengersInBus - 1);
             if(this.passengersSignaled == 0)
                 this.busDriverCondition.signal();
+            this.repository.passengerEnteringTheBus(pid, this.passengersInBus - 1);
         } catch (Exception e) {
             System.out.println("ATTQ: enterTheBus: " + e.toString());
         } finally {

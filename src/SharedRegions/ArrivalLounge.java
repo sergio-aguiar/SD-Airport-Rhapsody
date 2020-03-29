@@ -143,9 +143,9 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.reentrantLock.lock();
         try {
             if(!this.bagsInThePlane.isEmpty()) {
-                this.repository.porterTryCollectingBagFromPlane(true);
                 System.out.println(this.bagsInThePlane.toString());
                 if(!this.bagsInThePlane.isEmpty()) returnVal = this.bagsInThePlane.pop().toString();
+                this.repository.porterTryCollectingBagFromPlane(true);
             }
             this.repository.porterTryCollectingBagFromPlane(false);
         } catch (Exception e) {
