@@ -14,7 +14,7 @@ public interface ATTQBusDriver {
 	/**
      * Bus Driver announcing the bs boarding.
      */
-    public void announcingBusBoarding();
+    public boolean announcingBusBoarding();
 	/**
      * The bus driver goes to the Departure Terminal.
      * @param bid Bus Driver id.

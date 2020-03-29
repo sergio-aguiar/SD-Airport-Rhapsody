@@ -198,7 +198,7 @@ public class Repository {
         try {
             this.porterInitiated = true;
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -211,7 +211,7 @@ public class Repository {
             if(success) this.numberOfLuggageAtThePlane--;
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -224,7 +224,7 @@ public class Repository {
             this.numberOfLuggageOnConveyor++;
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -237,7 +237,7 @@ public class Repository {
             this.numberOfLuggageAtTheStoreRoom++;
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -249,7 +249,7 @@ public class Repository {
             this.setPorterState(PorterThread.PorterStates.WAITING_FOR_A_PLANE_TO_LAND);
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -260,7 +260,7 @@ public class Repository {
         try {
             this.passengersInitiated[pid] = true;
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -272,7 +272,7 @@ public class Repository {
             this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_LUGGAGE_COLLECTION_POINT);
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -285,7 +285,7 @@ public class Repository {
             this.passengerLuggageCollected[pid]++;
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -297,7 +297,7 @@ public class Repository {
             this.setPassengerState(pid, PassengerThread.PassengerStates.EXITING_THE_ARRIVAL_TERMINAL);
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -311,7 +311,7 @@ public class Repository {
             this.busSeats[seat] = String.valueOf(pid);
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -323,7 +323,7 @@ public class Repository {
             this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_ARRIVAL_TRANSFER_TERMINAL);
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -336,7 +336,7 @@ public class Repository {
             this.numberOfBagsThatWereLost += missingBags;
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -348,7 +348,7 @@ public class Repository {
             this.setPassengerState(pid, PassengerThread.PassengerStates.ENTERING_THE_DEPARTURE_TERMINAL);
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -361,7 +361,7 @@ public class Repository {
             this.busSeats[seat] = "-";
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -373,7 +373,7 @@ public class Repository {
             this.busWaitingQueue[position] = String.valueOf(pid);
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -384,7 +384,7 @@ public class Repository {
         try {
             this.busDriverInitiated = true;
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -396,7 +396,7 @@ public class Repository {
             this.setBusDriverState(BusDriverThread.BusDriverStates.PARKING_AT_THE_ARRIVAL_TERMINAL);
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -408,7 +408,7 @@ public class Repository {
             this.setBusDriverState(BusDriverThread.BusDriverStates.DRIVING_FORWARD);
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -420,7 +420,7 @@ public class Repository {
             this.setBusDriverState(BusDriverThread.BusDriverStates.DRIVING_BACKWARD);
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -432,7 +432,7 @@ public class Repository {
             this.setBusDriverState(BusDriverThread.BusDriverStates.PARKING_AT_THE_DEPARTURE_TERMINAL);
             this.log();
         } catch (Exception e) {
-            System.out.print("Repository: " + e.toString());
+            System.out.println("Repository: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }

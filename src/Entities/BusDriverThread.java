@@ -69,17 +69,11 @@ public class BusDriverThread extends Thread {
      */
     @Override
     public void run() {
-        System.out.println("BUS DRIVER STARTING!");
         while(!this.attqBusDriver.hasDaysWorkEnded()) {
-            System.out.println("BUS DRIVER ANNOUNCING BUS BOARDING!");
-            this.attqBusDriver.announcingBusBoarding();
-            System.out.println("BUS DRIVER GOING TO DEPARTURE TERMINAL!");
+            if(!this.attqBusDriver.announcingBusBoarding()) break;
             this.passengersBeingTaken = this.attqBusDriver.goToDepartureTerminal(this.bid);
-            System.out.println("BUS DRIVER PARKING AND LETTING PASSENGERS OFF!");
             this.dttqBusDriver.parkTheBusAndLetPassOff(this.bid, this.passengersBeingTaken);
-            System.out.println("BUS DRIVER GOING TO ARRIVAL TERMINAL!");
             this.dttqBusDriver.goToArrivalTerminal(this.bid);
-            System.out.println("BUS DRIVER PARKING THE BUS!");
             this.attqBusDriver.parkTheBus(this.bid);
         }
     }

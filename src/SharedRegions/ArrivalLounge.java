@@ -19,7 +19,10 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
 
     private final ReentrantLock reentrantLock;
     private final Condition porterCondition;
-    
+
+    private final int maxCrossFlightPassengers;
+    private int crossFlightPassengerCount;
+
     /**
      * Number of total passengers.
      */
@@ -32,7 +35,8 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
      * Flight number.
      */
     private int flightNumber;
-    
+
+    private int totalFlights;
     /**
      * Array of luggage number per flight.
      */
@@ -62,11 +66,14 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
      * @param luggageNumberPerFlight Luggage number per flight.
      * @param luggagePerFlight Luggage per flight.
      */
-    public ArrivalLounge(Repository repository, int totalPassengers, int[] luggageNumberPerFlight,
+    public ArrivalLounge(Repository repository, int totalPassengers, int totalFlights, int[] luggageNumberPerFlight,
                          Bag[][][] luggagePerFlight) {
         this.reentrantLock = new ReentrantLock();
         this.porterCondition = this.reentrantLock.newCondition();
+        this.maxCrossFlightPassengers = totalFlights * totalPassengers;
+        this.crossFlightPassengerCount = 0;
         this.totalPassengers = totalPassengers;
+        this.totalFlights = totalFlights;
         this.passengersThatArrived = 0;
         this.flightNumber = 0;
         this.luggageNumberPerFlight = luggageNumberPerFlight;
@@ -94,7 +101,31 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.flightNumber++;
         this.bagArrayToStack(this.flightNumber);
     }
-	  
+
+    public boolean passengersNoLongerNeedTheBus() {
+        boolean maxReached = false;
+        this.reentrantLock.lock();
+        try {
+            maxReached = this.maxCrossFlightPassengers == this.crossFlightPassengerCount;
+        } catch (Exception e) {
+            System.out.println("AL: incrementCrossFLightPassengerCount: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
+        return maxReached;
+    }
+
+    public void incrementCrossFlightPassengerCount() {
+        this.reentrantLock.lock();
+        try {
+            this.crossFlightPassengerCount++;
+        } catch (Exception e) {
+            System.out.println("AL: incrementCrossFLightPassengerCount: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
+    }
+
     /** 
      * Porter method: The porter takes a rest.
      * 
@@ -103,11 +134,11 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
      */
     @Override
     public boolean takeARest(int pid) {
-        boolean done = false;
+        boolean done = (this.flightNumber == this.totalFlights - 1 && this.bagsInThePlane.size() == 0);
         this.reentrantLock.lock();
         try {
             this.repository.porterInitiated();
-            this.porterCondition.await();
+            if(!done) this.porterCondition.await();
         } catch (Exception e) {
             System.out.println("AL: takeARest: " + e.toString());
         } finally {
@@ -120,11 +151,12 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
      * @param pid Passenger id.
      */
     @Override
-    public void whatShouldIDo(int pid) {
+    public void whatShouldIDo(int pid, String situation) {
         this.reentrantLock.lock();
         try {
             this.repository.passengerInitiated(pid);
             this.passengersThatArrived++;
+            if(situation.equals("FDT")) this.incrementCrossFlightPassengerCount();
             if(this.passengersThatArrived == this.totalPassengers) this.porterCondition.signal();
         } catch (Exception e) {
             System.out.println("AL: whatShouldIDo: " + e.toString());
@@ -143,8 +175,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.reentrantLock.lock();
         try {
             if(!this.bagsInThePlane.isEmpty()) {
-                System.out.println(this.bagsInThePlane.toString());
-                if(!this.bagsInThePlane.isEmpty()) returnVal = this.bagsInThePlane.pop().toString();
+                returnVal = this.bagsInThePlane.pop().toString();
                 this.repository.porterTryCollectingBagFromPlane(true);
             }
             this.repository.porterTryCollectingBagFromPlane(false);

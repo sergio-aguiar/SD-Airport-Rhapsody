@@ -55,7 +55,16 @@ public class ArrivalTerminalExit implements ATEPassenger {
      * @return the number of waiting passengers.
      */
     public int getWaitingPassengers() {
-        return this.waitingPassengers;
+        int tmpWaitingPassengers = 0;
+        this.reentrantLock.lock();
+        try {
+            tmpWaitingPassengers = this.waitingPassengers;
+        } catch (Exception e) {
+            System.out.print("ATE: getWaitingPassengers: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
+        return tmpWaitingPassengers;
     }
     /**
      * Signal waiting passengers.
@@ -79,11 +88,12 @@ public class ArrivalTerminalExit implements ATEPassenger {
      */
     @Override
     public void goHome(int pid) {
+        int dteWaitingPassengers = this.dte.getWaitingPassengers();
         this.reentrantLock.lock();
         try {
             this.repository.passengerGoingHome(pid);
             this.waitingPassengers++;
-            if(this.waitingPassengers + this.dte.getWaitingPassengers() == this.totalPassengers) {
+            if(this.waitingPassengers + dteWaitingPassengers == this.totalPassengers) {
                 this.dte.signalWaitingPassengers();
                 this.passengerCondition.signalAll();
                 this.waitingPassengers = 0;

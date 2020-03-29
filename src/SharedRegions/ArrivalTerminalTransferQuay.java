@@ -1,7 +1,5 @@
 package SharedRegions;
 
-import Entities.BusDriverThread;
-import Entities.PassengerThread;
 import Interfaces.ATTQBusDriver;
 import Interfaces.ATTQPassenger;
 
@@ -53,7 +51,9 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
      * Array with the passengers waiting the bus.
      */
     private String[] busWaitingQueue;
-    
+
+    private ArrivalLounge al;
+
     /**
      * Instace of the repository.
      */
@@ -65,7 +65,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
      * @param totalPassengers Number of total passengers.
      * @param busSeatNumber Bus seat number.
      */
-    public ArrivalTerminalTransferQuay(Repository repository, int totalPassengers, int busSeatNumber){
+    public ArrivalTerminalTransferQuay(Repository repository, int totalPassengers, int busSeatNumber, ArrivalLounge al){
         this.reentrantLock = new ReentrantLock(true);
         this.busQueueCondition = this.reentrantLock.newCondition();
         this.busDriverCondition = this.reentrantLock.newCondition();
@@ -79,6 +79,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         this.busWaitingQueue = new String[totalPassengers];
         Arrays.fill(this.busSeats, "-");
         Arrays.fill(this.busWaitingQueue, "-");
+        this.al = al;
         this.repository = repository;
     }
     
@@ -166,10 +167,16 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
      *
      */
     @Override
-    public void announcingBusBoarding() {
+    public boolean announcingBusBoarding() {
         this.reentrantLock.lock();
         try {
-            do this.busDriverCondition.awaitNanos(100); while(this.queuedPassengers == 0);
+            do {
+                this.busDriverCondition.awaitNanos(100);
+                if(al.passengersNoLongerNeedTheBus()) {
+                    System.out.print("GOODBYE CRUEL WORLD!");
+                    return false;
+                }
+            } while(this.queuedPassengers == 0);
             this.busBoarding = true;
             for(int i = 0; i < this.busSeatNumber && i < this.queuedPassengers; i++) {
                 passengersSignaled++;
@@ -181,6 +188,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         } finally {
             this.reentrantLock.unlock();
         }
+        return true;
     }
     /**
      * Passenger method: the Passenger enters the bus.
@@ -211,6 +219,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
      */
     @Override
     public boolean hasDaysWorkEnded() {
+        boolean dayEnded = this.al.passengersNoLongerNeedTheBus();
         this.reentrantLock.lock();
         try {
             this.repository.busDriverInitiated();
@@ -219,7 +228,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         } finally {
             this.reentrantLock.unlock();
         }
-        return false;
+        return dayEnded;
     }
     
     /**
@@ -272,10 +281,9 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         int busPassengers = 0;
         this.reentrantLock.lock();
         try {
-            System.out.println("PASSENGERS SIGNALLED: " + this.passengersSignaled);
-            System.out.println("PASSENGERS IN BUS: " + this.passengersInBus);
-            this.repository.busDriverGoingToDepartureTerminal();
             busPassengers = this.passengersInBus;
+            for(int i = 0; i < busPassengers; i++) al.incrementCrossFlightPassengerCount();
+            this.repository.busDriverGoingToDepartureTerminal();
         } catch (Exception e) {
             System.out.println("ATTQ: goToDepartureTerminal: " + e.toString());
         } finally {

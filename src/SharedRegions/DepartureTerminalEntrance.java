@@ -48,7 +48,16 @@ public class DepartureTerminalEntrance implements DTEPassenger {
      * @return number of waiting passengers.
      */
     public int getWaitingPassengers() {
-        return this.waitingPassengers;
+        int tmpWaitingPassengers = 0;
+        this.reentrantLock.lock();
+        try {
+            tmpWaitingPassengers = this.waitingPassengers;
+        } catch (Exception e) {
+            System.out.println("DTE: getWaitingPassengers: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
+        return tmpWaitingPassengers;
     }
     /**
      * Sginal the waiting passsengers.
@@ -58,7 +67,7 @@ public class DepartureTerminalEntrance implements DTEPassenger {
         try {
             this.passengerCondition.signalAll();
         } catch (Exception e) {
-            System.out.print("DTE: signalWaitingPassengers: " + e.toString());
+            System.out.println("DTE: signalWaitingPassengers: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
@@ -74,18 +83,19 @@ public class DepartureTerminalEntrance implements DTEPassenger {
      */
     @Override
     public void prepareNextLeg(int pid) {
+        int ateWaitingPassengers = this.ate.getWaitingPassengers();
         this.reentrantLock.lock();
         try {
             this.repository.passengerPreparingNextLeg(pid);
             this.waitingPassengers++;
-            if(this.waitingPassengers + this.ate.getWaitingPassengers() == this.totalPassengers) {
+            if(this.waitingPassengers + ateWaitingPassengers == this.totalPassengers) {
                 this.ate.signalWaitingPassengers();
                 this.passengerCondition.signalAll();
                 this.waitingPassengers = 0;
             }
             else this.passengerCondition.await();
         } catch (Exception e) {
-            System.out.print("DTE: prepareNextLeg: " + e.toString());
+            System.out.println("DTE: prepareNextLeg: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }

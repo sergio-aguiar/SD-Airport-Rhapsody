@@ -13,7 +13,7 @@ public interface ALPassenger {
      * @param pid Passanger id.
      * 
      */
-    public void whatShouldIDo(int pid);
+    public void whatShouldIDo(int pid, String situation);
 	 /**
      * The Passenger goes collect a bag.
      * @param pid Passanger id.

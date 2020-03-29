@@ -15,7 +15,7 @@ import java.util.Random;
 
 public class AirportRhapsodyMain {
 
-    private static final int k = 2; // K plane landings
+    private static final int k = 1; // K plane landings
     private static final int n = 6; // N passengers
     private static final int m = 2; // 0 to M luggage per passenger
     private static final int t = 3; // T bus seats
@@ -57,9 +57,9 @@ public class AirportRhapsodyMain {
             System.out.println("Repository Error!");
         }
 
-        arrivalLoungeMonitor = new ArrivalLounge(repositoryMonitor, n, totalLuggagePerFlight, passengerBags);
+        arrivalLoungeMonitor = new ArrivalLounge(repositoryMonitor, n, k, totalLuggagePerFlight, passengerBags);
         arrivalTerminalExitMonitor = new ArrivalTerminalExit(repositoryMonitor, n);
-        arrivalTerminalTransferQuayMonitor = new ArrivalTerminalTransferQuay(repositoryMonitor, n, t);
+        arrivalTerminalTransferQuayMonitor = new ArrivalTerminalTransferQuay(repositoryMonitor, n, t, arrivalLoungeMonitor);
         baggageCollectionPointMonitor = new BaggageCollectionPoint(repositoryMonitor, n);
         baggageReclaimOfficeMonitor = new BaggageReclaimOffice(repositoryMonitor);
         departureTerminalEntranceMonitor = new DepartureTerminalEntrance(repositoryMonitor, n);
