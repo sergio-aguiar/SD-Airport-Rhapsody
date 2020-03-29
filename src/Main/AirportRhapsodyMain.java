@@ -1,4 +1,4 @@
-package sd.airport.rhapsody;
+package Main;
 
 import Entities.BusDriverThread;
 import Entities.PassengerThread;
@@ -90,8 +90,10 @@ public class AirportRhapsodyMain {
             if(flight != 0) {
                 repositoryMonitor.prepareForNextFlight(totalLuggagePerFlight[flight], passengerSituations[flight]);
                 arrivalLoungeMonitor.prepareForNextFLight();
+                arrivalTerminalExitMonitor.prepareForNextFlight();
                 arrivalTerminalTransferQuayMonitor.prepareForNextFLight();
                 baggageCollectionPointMonitor.prepareForNextFLight();
+                departureTerminalEntranceMonitor.prepareForNextFlight();
                 departureTerminalTransferQuayMonitor.prepareForNextFLight();
                 temporaryStorageAreaMonitor.prepareForNextFlight();
             }

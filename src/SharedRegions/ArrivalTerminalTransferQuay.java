@@ -7,28 +7,34 @@ import java.util.Arrays;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-/** Arrival Terminal Transger Quay shared region
- * Used by Passenger and Bus Driver.
+/** Arrival Terminal Transfer Quay: Where passengers await the bus to transfer terminals and the bus driver awaits them.
+ * Used by PASSENGER and BUS DRIVER.
  * @author sergiaguiar
  * @author marcomacedo
  */
 public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver {
-
+    /**
+     * The class's ReentrantLock instance.
+     */
     private final ReentrantLock reentrantLock;
+    /**
+     * The Condition instance where the passengers wait for the bus driver to signal that he bus is now boarding.
+     */
     private final Condition busQueueCondition;
+    /**
+     * The Condition instance where bus driver awaits for queued passengers and for them to later enter the bus.
+     */
     private final Condition busDriverCondition;
-    
      /**
-     * Number of total passengers.
+     * Total number of passengers per flight.
      */
     private final int totalPassengers;
     /**
-     * Bus seat number.
+     * Number of seats in the bus.
      */
     private final int busSeatNumber;
-    
     /**
-     * Number of queued Passengers.
+     * Number of passengers in the bus waiting queue.
      */
     private int queuedPassengers;
     /**
@@ -39,23 +45,24 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
      * Number of passengers signaled to board the bus.
      */
     private int passengersSignaled;
-
-    private boolean busBoarding;
-
     /**
-     * Array with the bus seat numbers.
+     * Attribute that specifies whether the bus is already boarding or not.
+     */
+    private boolean busBoarding;
+    /**
+     * Array with the bus seat positions.
      */
     private final String[] busSeats;
-        
     /**
-     * Array with the passengers waiting the bus.
+     * Array with the bus waiting queue positions.
      */
     private String[] busWaitingQueue;
-
-    private ArrivalLounge al;
-
     /**
-     * Instace of the repository.
+     * The class's ArrivalLounge instance.
+     */
+    private ArrivalLounge al;
+    /**
+     * The class's Repository instance.
      */
     private final Repository repository;
     
@@ -82,20 +89,17 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         this.al = al;
         this.repository = repository;
     }
-    
     /**
-     * Add passengers to the waiting queue.
-     * @param pid passenger id.
-     * @param positionInQueue passenger position in the queue.
+     * Function that adds passengers to the waiting queue.
+     * @param pid The passenger's ID.
+     * @param positionInQueue The passenger's position in the queue.
      */
     private void addToWaitingQueue(int pid, int positionInQueue) {
         this.busWaitingQueue[positionInQueue] = String.valueOf(pid);
     }
-    
     /**
-     * Removee passenger from the waiting queue.
-     * @param pid passenger id.
-     * @return number of passengers in the queue.
+     * Function that removes a passenger from the waiting queue.
+     * @param pid The passenger's ID.
      */
     private void removeFromWaitingQueue(int pid) {
         String[] tmpQueue = new String[this.totalPassengers];
@@ -110,58 +114,45 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         tmpQueue[this.totalPassengers - 1] = "-";
         this.busWaitingQueue = Arrays.copyOf(tmpQueue, this.totalPassengers);
     }
-    
     /**
-     * Adding new seats to bus.
-     * @param pid passenger id.
-     * @param seatInBus seat in the bus.
+     * Adding a passenger to the bus.
+     * @param pid The passenger's ID.
+     * @param seatInBus The passenger's seat on the bus.
      */
     private void addToBusSeats(int pid, int seatInBus) {
         this.busSeats[seatInBus] = String.valueOf(pid);
     }
-    
     /**
-     * Number of passengers in the bus.
-     * @return Number of passengers in the bus.
-     */
-    private int numberOfPassengersInBus() {
-        int passengerCount = 0;
-        for(String seat : this.busSeats) if(!seat.equals("-")) passengerCount++;
-        return passengerCount;
-    }
-    
-    /**
-     * The passenger get into queue.
-     * @param pid passenger id.
-     * @return decrease number of passengers the the queue.
+     * Function to get a passenger into the bus waiting queue.
+     * @param pid The passenger's ID.
+     * @return The amount of queued passengers minus 1 (for position usage).
      */
     private int getIntoQueue(int pid) {
         this.addToWaitingQueue(pid, queuedPassengers);
         this.queuedPassengers++;
         return this.queuedPassengers - 1;
     }
-    
     /**
-     * Passenger get out of the queue.
-     * @param pid passenger id.
-     * @return  position in the queue.
+     * Function to get a passenger out of the bus waiting queue.
+     * @param pid The passenger's ID.
      */
     private void getOutOfQueue(int pid) {
         this.removeFromWaitingQueue(pid);
         this.queuedPassengers--;
     }
-    
     /**
-     * Passenger get into the bus.
-     * @param pid passenger id.
-     * @return decrease number of passengers int the bus.
+     * Function that gets the passenger into the bus.
+     * @param pid The passenger's ID.
+     * @return The amount of passengers in the bus minus 1 (for position usage).
      */
     private int getIntoBus(int pid) {
         this.addToBusSeats(pid, this.passengersInBus);
         this.passengersInBus++;
         return this.passengersInBus - 1;
     }
-
+    /**
+     * Function that allows for a transition to a new flight (new plane landing simulation).
+     */
     public void prepareForNextFLight() {
         this.queuedPassengers = 0;
         this.passengersInBus = 0;
@@ -170,10 +161,8 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         Arrays.fill(this.busSeats, "-");
         Arrays.fill(this.busWaitingQueue, "-");
     }
-
     /**
-     * Bus driver method: the Bus driver announces the bus boarding. 
-     *
+     * The bus driver announces that the bus is boarding after seeing that at least one passenger is in queue.
      */
     @Override
     public boolean announcingBusBoarding() {
@@ -197,9 +186,8 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         return true;
     }
     /**
-     * Passenger method: the Passenger enters the bus.
-     * @param pid Passenger id.
-     * @return bus seat.
+     * The Passenger leaves the waiting queue and enters the bus.
+     * @param pid The passenger's ID.
      */
     @Override
     public int enterTheBus(int pid) {
@@ -218,10 +206,9 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         }
         return busSeat;
     }
-    
     /**
-     * Bus driver method: has days ended.
-     * @return true if has days work ended or false otherwise
+     * The bus driver checks if his services are needed in the future.
+     * @return true if the bus driver's services are not needed in the future and false otherwise.
      */
     @Override
     public boolean hasDaysWorkEnded() {
@@ -230,16 +217,15 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         try {
             this.repository.busDriverInitiated();
         } catch (Exception e) {
-            System.out.print("ATTQ: parkTheBus: " + e.toString());
+            System.out.print("ATTQ: hasDaysWorkEnded: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
         return dayEnded;
     }
-    
     /**
-     * Bus Driver method: The bus driver parks the bus.
-     * @param bid Bus driver id.
+     * The bus driver parks the bus and gets ready for possibly a new trip.
+     * @param bid The bus driver's ID.
      */
     @Override
     public void parkTheBus(int bid) {
@@ -255,10 +241,9 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
             this.reentrantLock.unlock();
         }
     }
-    
     /**
-     * Passenger method: the passenger takes the bus.
-     * @param pid passenger id.
+     * The passenger decides to take the bus and enters the waiting queue.
+     * @param pid the passenger's ID.
      */
     @Override
     public void takeABus(int pid) {
@@ -276,11 +261,10 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
             this.reentrantLock.unlock();
         }
     }
-    
     /**
-     * Bus driver method: the bus driver goes to departure terminal.
-     * @param bid Bus driver id.
-     * @return number of bus passengers.
+     * The bus driver drives towards the Departure Terminal Transfer Quay.
+     * @param bid The bus driver's ID.
+     * @return the number of passenger being taken inside the bus.
      */
     @Override
     public int goToDepartureTerminal(int bid) {

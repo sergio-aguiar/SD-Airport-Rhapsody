@@ -1,22 +1,21 @@
 package Interfaces;
 
-import Extras.Bag;
 /**
- * Porter Baggage Collection Point Interface.
+ * Porter's Baggage Collection Point Interface.
  * 
  * @author sergioaguiar
  * @author marcomacedo
  */
 public interface BCPPorter {
 	/**
-     * The Porter carry the bags to the appropriate Store.
-     * @param pid Porter id.
-     * @param bagID Bag id.
+     * The Porter carries their held bag to the Baggage Collection Point.
+     * @param pid The porter's ID.
+     * @param bagID The porter's held bag's owner's ID.
      */
     public void carryItToAppropriateStore(int pid, int bagID);
 	/**
-     * The porter has no more bags to collect.
-     * @param pid Porter id.
+     * The porter announces that there are no more bags in the plane by signalling every waiting passenger.
+     * @param pid The passenger's ID.
      */
     public void noMoreBagsToCollect(int pid);
 }

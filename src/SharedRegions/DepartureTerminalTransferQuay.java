@@ -1,42 +1,48 @@
 package SharedRegions;
 
-import Entities.BusDriverThread;
-import Entities.PassengerThread;
 import Interfaces.DTTQBusDriver;
 import Interfaces.DTTQPassenger;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 /**
- * Departure Terminal Tranfer Quay. Used by passenger and bus driver.
+ * Departure Terminal Transfer Quay: Where the bus driver takes the passengers on his bus and where the passengers go to be able to reach the Departure Terminal Entrance.
+ * Used by PASSENGER and BUS DRIVER.
  * @author sergiaguiar
  * @author marcomacedo
  */
 public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriver {
-
-    private final ReentrantLock reentrantLock;
-    private final Condition passengerCondition;
-    private final Condition busDriverCondition;
-    
     /**
-     * Number of passengers that arrived.
+     * The class's ReentrantLock instance.
+     */
+    private final ReentrantLock reentrantLock;
+    /**
+     * The Condition instance where the passengers wait for the bus driver to signal that they have made it to the Departure Terminal Transfer Quay.
+     */
+    private final Condition passengerCondition;
+    /**
+     * The Condition instance where the bus driver waits for every passenger to leave the bus.
+     */
+    private final Condition busDriverCondition;
+    /**
+     * Total number of passengers that arrived on the bus.
      */
     private int passengersThatArrived;
     /**
-     * Number of passengers that lef the bus.
+     * Total number of passengers that have left the bus.
      */
     private int passengersThatLeftTheBus;
-
-    private boolean canLeaveTheBus;
-
     /**
-     * Instance of the repository.
+     * Attribute that states whether the passengers can leave the bus or not.
+     */
+    private boolean canLeaveTheBus;
+    /**
+     * The class's Repository instance.
      */
     private final Repository repository;
-    
     /**
-     * Departure Terminal Tranfer Quay constructor.
-     * @param repository repository.
+     * DepartureTerminalTransferQuay constructor.
+     * @param repository A reference to a repository object.
      */
     public DepartureTerminalTransferQuay(Repository repository) {
         this.reentrantLock = new ReentrantLock(true);
@@ -47,16 +53,17 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
         this.canLeaveTheBus = false;
         this.repository = repository;
     }
-
+    /**
+     * Function that allows for a transition to a new flight (new plane landing simulation).
+     */
     public void prepareForNextFLight() {
         this.passengersThatArrived = 0;
         this.passengersThatLeftTheBus = 0;
         this.canLeaveTheBus = false;
     }
-
     /**
-     * Bus Driver method: The bus driver go to arrival terminal.
-     * @param bid bus driver id.
+     * The bus driver drives towards the Arrival Terminal Transfer Quay.
+     * @param bid The bus driver's ID.
      */
     @Override
     public void goToArrivalTerminal(int bid) {
@@ -71,11 +78,9 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
             this.reentrantLock.unlock();
         }
     }
-    
     /**
-     * Passenger method: The Passenger leaves the bus.
-     * @param pid passenger id.
-     * @param seat  Bus seat.
+     * The passenger leaves the bus and signals the bus driver if he's the last one to do so.
+     * @param pid The passenger's ID.
      */
     @Override
     public void leaveTheBus(int pid, int seat) {
@@ -91,11 +96,10 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
             this.reentrantLock.unlock();
         }
     }
-    
     /**
-     * Bus driver method: the bus driver parks the bus and let the passegers off.
-     * @param bid Bus Driver id.
-     * @param passengersThatArrived number of passengers that arrived.
+     * The bus driver parks the Bus and let's teh passengers off.
+     * @param bid The bus driver's ID.
+     * @param passengersThatArrived The number of passengers that arrived aboard the bus.
      */
     @Override
     public void parkTheBusAndLetPassOff(int bid, int passengersThatArrived) {

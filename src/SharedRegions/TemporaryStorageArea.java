@@ -1,50 +1,47 @@
 package SharedRegions;
 
-import Entities.PorterThread;
 import Interfaces.TSAPorter;
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 /**
- *  Temporary storage area shared region: used by the Porter.
+ * Temporary Storage Area: Where the porter takes bags currently in transit.
+ * Used by PORTER.
  * @author sergiaguiar
  * @author marcomacedo
  */
 public class TemporaryStorageArea implements TSAPorter {
-
-    private final ReentrantLock reentrantLock;
-    
     /**
-     * Array List with the bags in the temprary storage area.
+     * The class's ReentrantLock instance.
+     */
+    private final ReentrantLock reentrantLock;
+    /**
+     * ArrayList that contains all the bags currently in temporary storage.
      */
     private final ArrayList<Integer> tsaBags;
-    
     /**
-     * Instance of repository.
+     * The class's Repository instance.
      */
     private final Repository repository;
-    
     /**
-     * Temporary storage area constructor.
-     * @param repository repository.
+     * TemporaryStorageArea constructor.
+     * @param repository A reference to a repository object.
      */
     public TemporaryStorageArea(Repository repository) {
         this.reentrantLock = new ReentrantLock(true);
         this.tsaBags = new ArrayList<>();
         this.repository = repository;
     }
-    
     /**
-     * removes all the bags from the temporary storage area.
+     * Function that allows for a transition to a new flight (new plane landing simulation).
      */
     public void prepareForNextFlight() {
         this.tsaBags.clear();
     }
-    
     /**
-     * Porter method: The porter carry the bags to the appropriate store.
-     * @param pid Poter id.
-     * @param bagID  bag id.
+     * The Porter carries their held bag to the Temporary Storage Area.
+     * @param pid The porter's ID.
+     * @param bagID The porter's held bag's owner's ID.
      */
     @Override
     public void carryItToAppropriateStore(int pid, int bagID) {

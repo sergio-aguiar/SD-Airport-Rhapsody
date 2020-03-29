@@ -1,20 +1,20 @@
 package Interfaces;
 /**
- * Bus Driver Departure Terminal Transfer Exit Interface.
+ * Bus Driver's Departure Terminal Transfer Exit Interface.
  * 
  * @author sergioaguiar
  * @author marcomacedo
  */
 public interface DTTQBusDriver {
 	/**
-     * The Bus Driver parks the Bus and let pass off.
-     * @param bid Bus driver id.
-     * @param PassengersThatArrived number of passengers that arrived.
+     * The bus driver parks the Bus and let's teh passengers off.
+     * @param bid The bus driver's ID.
+     * @param passengersThatArrived The number of passengers that arrived aboard the bus.
      */
-    public void parkTheBusAndLetPassOff(int bid, int PassengersThatArrived);
+    public void parkTheBusAndLetPassOff(int bid, int passengersThatArrived);
 	 /**
-     * The Bus Diver goes to the Arrival Terminal.
-     * @param bid Bus driver id.
+     * The bus driver drives towards the Arrival Terminal Transfer Quay.
+     * @param bid The bus driver's ID.
      */
     public void goToArrivalTerminal(int bid);
 }

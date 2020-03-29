@@ -1,7 +1,5 @@
 package SharedRegions;
 
-import Entities.PassengerThread;
-import Entities.PorterThread;
 import Extras.Bag;
 import Interfaces.ALPassenger;
 import Interfaces.ALPorter;
@@ -10,61 +8,71 @@ import java.util.Stack;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 /**
- * Arrival Lounge: Where the Passenger arrives and the Porter stays.
+ * Arrival Lounge: Where the Passenger arrives and the Porter awaits a plane to begin working.
  * Used by PORTER and PASSENGER.
  * @author sergiaguiar
  * @author marcomacedo
  */
 public class ArrivalLounge implements ALPassenger, ALPorter {
-
-    private final ReentrantLock reentrantLock;
-    private final Condition porterCondition;
-
-    private final int maxCrossFlightPassengers;
-    private int crossFlightPassengerCount;
-
     /**
-     * Number of total passengers.
+     * The class's ReentrantLock instance.
+     */
+    private final ReentrantLock reentrantLock;
+    /**
+     * The Condition instance where the porter awaits for every passenger to leave the plane.
+     */
+    private final Condition porterCondition;
+    /**
+     * The total amount of passengers throughout every planned flight.
+     */
+    private final int maxCrossFlightPassengers;
+    /**
+     * A count for the amount of passengers throughout every planned flight who have made it past where the bus driver is needed.
+     */
+    private int crossFlightPassengerCount;
+    /**
+     * Total number of passengers per flight.
      */
     private final int totalPassengers;
     /**
-     * Number of Passengers that arrived at airport.
+     * Number of Passengers that arrived at airport on the current flight.
      */
     private int passengersThatArrived;
     /**
-     * Flight number.
+     * The current flight number.
      */
     private int flightNumber;
-
+    /**
+     * Total number of flights.
+     */
     private int totalFlights;
     /**
-     * Array of luggage number per flight.
+     * Array that contains the amount of luggage coming inside of every plane (every flight).
      */
     private final int[] luggageNumberPerFlight;
-    
     /**
-     * Lugagge per flight.
+     * Array that contains the bags of each passenger per flight.
      */
     private final Bag[][][] luggagePerFlight;
-    
     /**
-     * Stack with Bags in the plane.
+     * Stack that contains the bags currently in the plane.
      */
     private Stack<Bag> bagsInThePlane;
     /**
-     * Number of luggage picked up.
+     * Number of luggage currently picked up by the porter.
      */
     private int luggagePickedUp;
     /**
-     * Instace of the Repository.
+     * The class's Repository instance.
      */
     private final Repository repository;
     /**
-     * Arrival Lounge constructor.
-     * @param repository repository.
-     * @param totalPassengers Number os total passengers.
-     * @param luggageNumberPerFlight Luggage number per flight.
-     * @param luggagePerFlight Luggage per flight.
+     * ArrivalLounge constructor.
+     * @param repository A reference to a repository object.
+     * @param totalPassengers Total number of passengers per flight.
+     * @param totalFlights Total number of flights.
+     * @param luggageNumberPerFlight Array that contains the amount of luggage coming inside of every plane (every flight).
+     * @param luggagePerFlight Array that contains the bags of each passenger per flight.
      */
     public ArrivalLounge(Repository repository, int totalPassengers, int totalFlights, int[] luggageNumberPerFlight,
                          Bag[][][] luggagePerFlight) {
@@ -84,7 +92,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.repository = repository;
     }
     /**
-     * Bag array to Stack.
+     * Function that fills the plane's bag Stack depending on the current flight number.
      * @param flightNumber Flight number.
      */
     private void bagArrayToStack(int flightNumber) {
@@ -93,9 +101,8 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
                 if(this.luggagePerFlight[flightNumber][i][j] != null)
                     this.bagsInThePlane.push(this.luggagePerFlight[flightNumber][i][j]);
     }
-    
     /**
-     * Incremet the flight number to the next flight.
+     * Function that allows for a transition to a new flight (new plane landing simulation).
      */
     public void prepareForNextFLight() {
         this.passengersThatArrived = 0;
@@ -103,7 +110,10 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.bagArrayToStack(this.flightNumber);
         this.luggagePickedUp = 0;
     }
-
+    /**
+     * Function that verifies if any more passengers in the future need the bus driver's services.
+     * @return true if no future passengers need the bus driver's services and false otherwise.
+     */
     public boolean passengersNoLongerNeedTheBus() {
         boolean maxReached = false;
         this.reentrantLock.lock();
@@ -116,7 +126,9 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         }
         return maxReached;
     }
-
+    /**
+     * Function that increments the count for the number of passengers throughout every planned flight who have made it past where the bus driver is needed.
+     */
     public void incrementCrossFlightPassengerCount() {
         this.reentrantLock.lock();
         try {
@@ -127,12 +139,10 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
             this.reentrantLock.unlock();
         }
     }
-
-    /** 
-     * Porter method: The porter takes a rest.
-     * 
-     * @param pid Porter id.
-     * @return true if taking a rest and false otherwise.
+    /**
+     * The porter checks whether he is still needed in the future. If so, he awaits the next flight. He stops otherwise.
+     * @param pid The porter's ID.
+     * @return true if the porter isn't needed anymore and false otherwise.
      */
     @Override
     public boolean takeARest(int pid) {
@@ -148,9 +158,10 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         }
         return done;
     }
-	/**
-     * Passenger method: the passenger is in Transit or Final destination.
+    /**
+     * Passenger's first action when arriving from the plane. Signal's the porter if the final passenger to arrive.
      * @param pid Passenger id.
+     * @param situation A string representation of the passenger's travel situation.
      */
     @Override
     public void whatShouldIDo(int pid, String situation) {
@@ -167,9 +178,9 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         }
     }
     /**
-     * Porter method: the Porter tries to collect a Bag.
-     * @param pid Porter id.
-     * @return 
+     * The porter tries to collect a bag from the plane's hold.
+     * @param pid The Porter's ID.
+     * @return the bag's owner ID as a String, or an empty String if the plane is empty of bags.
      */
     @Override
     public String tryToCollectABag(int pid) {
@@ -189,8 +200,8 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         return returnVal;
     }
     /**
-     * Passenger method: the Passenger goes collect a bag.
-     * @param pid Passenger id.
+     * The Passenger decides to move towards the Baggage Collection Point to collect a bag.
+     * @param pid The passenger's ID.
      */
     @Override
     public void goCollectABag(int pid) {

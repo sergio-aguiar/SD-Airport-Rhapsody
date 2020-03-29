@@ -1,58 +1,71 @@
 package SharedRegions;
 
-import Entities.PassengerThread;
 import Interfaces.ATEPassenger;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-/** Arrival terminal exit shared region: where the passenger waits for fellow passengers travelling in the same plane to be ready to leave airport or to check next leg.
- * Used by passengers.
+/** Arrival terminal Exit: Where passengers await the last one to reach their destination within the airport to signal them that they can leave.
+ * Used by PASSENGER.
  * @author sergiaguiar
  * @author marcomacedo
  */
 public class ArrivalTerminalExit implements ATEPassenger {
-
-    private final ReentrantLock reentrantLock;
-    private final Condition passengerCondition;
-    
     /**
-     * Number of total passengers.
+     * The class's ReentrantLock instance.
+     */
+    private final ReentrantLock reentrantLock;
+    /**
+     * The Condition instance where the passengers wait for the last passenger to arrive at their final destination in the airport.
+     */
+    private final Condition passengerCondition;
+    /**
+     * Attribute that states whether all passengers have arrived at their final destination within the airport.
+     */
+    private int allDone;
+    /**
+     * Attribute that states whether all passengers were signalled by the last one to arrive yet.
+     */
+    private boolean allSignaled;
+    /**
+     * Total number of passengers per flight.
      */
     private final int totalPassengers;
     /**
-     * Number of wainting passenger in the arrival terminal.
+     * Number of passengers waiting for the last one to arrive at their final destination inside the airport.
      */
     private int waitingPassengers;
-    
     /**
-     * Instance of the Departure Terminal Entrance.
+     * The class's instance of the Departure Terminal Entrance.
      */
     private DepartureTerminalEntrance dte;
     /**
-     * Instave of the repository.
+     * The class's Repository instance.
      */
     private final Repository repository;
-    
     /**
-     * Arrival terminal exit constructor.
-     * @param repository repository.
-     * @param totalPassengers number of total passengers.
+     * ArrivalTerminalExit constructor.
+     * @param repository A reference to a repository object.
+     * @param totalPassengers Total number of passengers per flight.
      */
     public ArrivalTerminalExit(Repository repository, int totalPassengers) {
         this.reentrantLock = new ReentrantLock(true);
         this.passengerCondition = this.reentrantLock.newCondition();
+        this.allDone = -1;
+        this.allSignaled = false;
         this.totalPassengers = totalPassengers;
         this.repository = repository;
     }
-
+    /**
+     * Function that sets the reference to a DepartureTerminalEntrance object.
+     * @param dte A reference to a DepartureTerminalEntrance object.
+     */
     public void setDte(DepartureTerminalEntrance dte) {
         this.dte = dte;
     }
-
     /**
-     * Get the waiting passengers.
-     * @return the number of waiting passengers.
+     * Function that gets the number of passengers waiting for the last one to arrive at their final destination inside the airport.
+     * @return the number of passengers waiting for the last one to arrive at their final destination inside the airport.
      */
     public int getWaitingPassengers() {
         int tmpWaitingPassengers = 0;
@@ -67,7 +80,7 @@ public class ArrivalTerminalExit implements ATEPassenger {
         return tmpWaitingPassengers;
     }
     /**
-     * Signal waiting passengers.
+     * Function that signals every waiting passenger.
      */
     public void signalWaitingPassengers() {
         this.reentrantLock.lock();
@@ -79,26 +92,56 @@ public class ArrivalTerminalExit implements ATEPassenger {
             this.reentrantLock.unlock();
         }
     }
-
     /**
-     * Passenger method: go home.
-     * @param pid passenger id.
+     * Function that allows for a transition to a new flight (new plane landing simulation).
+     */
+    public void prepareForNextFlight() {
+        this.allDone = -1;
+        this.allSignaled = false;
+        this.waitingPassengers = 0;
+    }
+    /**
+     * The passenger checks if they is the last to make it to their destination inside the airport. If so, they signal all others to leave together. Otherwise, they wait for the last one to signal them.
+     * @param pid The passenger's ID.
      */
     @Override
     public void goHome(int pid) {
-        int dteWaitingPassengers = this.dte.getWaitingPassengers();
         this.reentrantLock.lock();
         try {
-            this.repository.passengerGoingHome(pid);
+            System.out.println("PASSENGER " + pid + " INCREMENTED ATE!");
             this.waitingPassengers++;
-            if(this.waitingPassengers + dteWaitingPassengers == this.totalPassengers) {
+        } catch (Exception e) {
+            System.out.println("ATE1: goHome: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
+
+        System.out.println("PASSENGER " + pid + " GETTING DTE WAITING PASSENGERS!");
+        int dteWaitingPassengers = this.dte.getWaitingPassengers();
+        System.out.println("PASSENGER " + pid + " GOT : " + dteWaitingPassengers + " DTE WAITING!");
+
+        this.reentrantLock.lock();
+        try {
+            if(this.allDone == -1 && !this.allSignaled) {
+                if(this.waitingPassengers + dteWaitingPassengers == this.totalPassengers) this.allDone = pid;
+                else this.passengerCondition.await();
+            }
+        } catch (Exception e) {
+            System.out.println("ATE2: goHome: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
+
+        this.reentrantLock.lock();
+        try {
+            if(this.allDone == pid && !this.allSignaled) {
+                this.allSignaled = true;
+                System.out.println("PASSENGER " + pid + " SIGNALING EVERYONE!");
                 this.dte.signalWaitingPassengers();
                 this.passengerCondition.signalAll();
-                this.waitingPassengers = 0;
             }
-            else this.passengerCondition.await();
         } catch (Exception e) {
-            System.out.println("ATE: goHome: " + e.toString());
+            System.out.println("ATE3: goHome: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }

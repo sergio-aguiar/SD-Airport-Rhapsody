@@ -144,37 +144,24 @@ public class PassengerThread extends Thread {
      */
     @Override
     public void run() {
-        System.out.println("PASSENGER " + this.pid + " STARTED!");
         this.alPassenger.whatShouldIDo(this.pid, this.passengerSituation.toString());
-        System.out.println("PASSENGER " + this.pid + " DECIDED WHAT TO DO!");
         if(this.passengerSituation.toString().equals(PassengerAndBagSituations.FDT.toString())) {
-            System.out.println("PASSENGER " + this.pid + " CHECKING IF THEY HAVE LUGGAGE TO GET1");
             if(this.luggageAtStart != 0) {
-                System.out.println("PASSENGER " + this.pid + " GOING TO COLLECT A BAG!");
                 this.alPassenger.goCollectABag(this.pid);
-                System.out.println("PASSENGER " + this.pid + " TRYING TO COLLECT A BAG!");
                 while(this.bcpPassenger.goCollectABag(this.pid)) {
                     this.currentLuggage++;
                     if(this.currentLuggage == this.luggageAtStart) break;
                 }
-                System.out.println("PASSENGER " + this.pid + " SEEING IF THEY HAVE ANY LUGGAGE MISSING!");
-                if(this.currentLuggage != this.luggageAtStart)
-                    System.out.println("PASSENGER " + this.pid + " REPORTING MISSING BAGS!");
+                if(this.currentLuggage != this.luggageAtStart) {
                     this.broPassenger.reportMissingBags(this.pid, this.luggageAtStart - this.currentLuggage);
+                }
             }
-            System.out.println("PASSENGER " + this.pid + " GOING HOME!");
             this.atePassenger.goHome(this.pid);
-            System.out.println("PASSENGER " + this.pid + " WENT HOME!");
         } else {
-            System.out.println("PASSENGER " + this.pid + " DECIDED TO TAKE A BUS!");
             this.attqPassenger.takeABus(this.pid);
-            System.out.println("PASSENGER " + this.pid + " IS ABOUT TO ENTER THE BUS!");
             this.busSeat = this.attqPassenger.enterTheBus(this.pid);
-            System.out.println("PASSENGER " + this.pid + " IS ABOUT TO LEAVE THE BUS!");
             this.dttqPassenger.leaveTheBus(this.pid, this.busSeat);
-            System.out.println("PASSENGER " + this.pid + " LEFT THE BUS AND IS PREPARING FOR THE NEXT LEG!");
             this.dtePassenger.prepareNextLeg(this.pid);
-            System.out.println("PASSENGER " + this.pid + " WENT INTO THE NEXT LEG!");
         }
     }
 }

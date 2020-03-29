@@ -1,6 +1,5 @@
 package SharedRegions;
 
-import Entities.PorterThread;
 import Interfaces.BCPPassenger;
 import Interfaces.BCPPorter;
 
@@ -9,31 +8,40 @@ import java.util.Arrays;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**Baggage Colection Point: Used by passenger for and Porter.
+/**Baggage Collection Point: Where passengers pick up their luggage and where the porter leaves final destination luggage.
+ * Used by PORTER and PASSENGER.
  * @author sergiaguiar
  * @author marcomacedo
  */
 public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
-
-    private final ReentrantLock reentrantLock;
-    private final Condition[] passengerLuggageConditions;
-
-    private final int[] passengerLuggageNumber;
-    private boolean noMoreBags;
-
     /**
-     * Arraylist of bags int he colection point.
+     * The class's ReentrantLock instance.
+     */
+    private final ReentrantLock reentrantLock;
+    /**
+     * Array of Condition instances (one for each passenger) where each passenger waits for one of their bags to be put onto the conveyor belt.
+     */
+    private final Condition[] passengerLuggageConditions;
+    /**
+     * Array that contains the amount of luggage waiting to be collected by each passenger.
+     */
+    private final int[] passengerLuggageNumber;
+    /**
+     * Attribute that states whether there are any more bags on the conveyor belt or not.
+     */
+    private boolean noMoreBags;
+    /**
+     * Arraylist of bags on the conveyor belt.
      */
     private final ArrayList<Integer> bcpBags;
     /**
-     * Instance of the repository.
+     * The class's Repository instance.
      */
     private final Repository repository;
-    
     /**
-     * Baggage Collection Point constructor.
-     * @param repository repository.
-     * @param totalPassengers number of total passengers.
+     * BaggageCollectionPoint constructor.
+     * @param repository A reference to a repository object.
+     * @param totalPassengers Total number of passengers per flight.
      */
     public BaggageCollectionPoint(Repository repository, int totalPassengers) {
         this.reentrantLock = new ReentrantLock(true);
@@ -45,19 +53,18 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
         this.bcpBags = new ArrayList<>();
         this.repository = repository;
     }
-    
     /**
-     * Passenger bag is int the collection point?
-     * @param pid passenger id.
-     * @return true if bag in the collection point, false otherwise.
+     * Function that checks whether a passenger's bag is on the conveyor belt.
+     * @param pid The passenger's ID.
+     * @return true if a bag belonging to the passenger is on the conveyor belt and false otherwise.
      */
     private boolean isPassengerBagInCollectionPoint(int pid) {
         for(Integer bag : this.bcpBags) if(bag == pid) return true;
         return false;
     }
     /**
-     * The passenger claims a bag from the collection point.
-     * @param pid passenger id.
+     * The passenger claims a bag from the conveyor belt.
+     * @param pid The passenger's ID.
      */
     private void claimBagFromBaggageCollectionPoint(int pid) {
         for(Integer bag : this.bcpBags)
@@ -66,15 +73,16 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
                 break;
             }
     }
-
+    /**
+     * Function that allows for a transition to a new flight (new plane landing simulation).
+     */
     public void prepareForNextFLight() {
         Arrays.fill(this.passengerLuggageNumber, 0);
     }
-
     /**
-     * Passenger method: the passenger go collect a bag from the collection point.
-     * @param pid passenger id.
-     * @return true if succes, false otherwise.
+     * The Passenger tries to collect a bag from the conveyor.
+     * @param pid The passenger's ID.
+     * @return true if passenger succeeded in collecting a bag and false otherwise.
      */
     @Override
     public boolean goCollectABag(int pid) {
@@ -97,11 +105,10 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
         }
         return success;
     }
-    
     /**
-     * Porter method: The porter carries the Bag to the appropriate store.
-     * @param pid Porter id.
-     * @param bagID Bag id.
+     * The Porter carries their held bag to the Baggage Collection Point.
+     * @param pid The porter's ID.
+     * @param bagID The porter's held bag's owner's ID.
      */
     @Override
     public void carryItToAppropriateStore(int pid, int bagID) {
@@ -117,10 +124,9 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
             this.reentrantLock.unlock();
         }
     }
-    
     /**
-     * Porter method: The porter has no more bags to collect.
-     * @param pid Porter id.
+     * The porter announces that there are no more bags in the plane by signalling every waiting passenger.
+     * @param pid The passenger's ID.
      */
     @Override
     public void noMoreBagsToCollect(int pid) {
