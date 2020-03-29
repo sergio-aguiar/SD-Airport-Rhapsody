@@ -19,6 +19,7 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
     private final Condition[] passengerLuggageConditions;
 
     private final int[] passengerLuggageNumber;
+    private boolean noMoreBags;
 
     /**
      * Arraylist of bags int he colection point.
@@ -39,6 +40,7 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
         this.passengerLuggageConditions = new Condition[totalPassengers];
         for(int c = 0; c < totalPassengers; c++) this.passengerLuggageConditions[c] = this.reentrantLock.newCondition();
         this.passengerLuggageNumber = new int[totalPassengers];
+        this.noMoreBags = false;
         Arrays.fill(this.passengerLuggageNumber, 0);
         this.bcpBags = new ArrayList<>();
         this.repository = repository;
@@ -75,12 +77,15 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
         boolean success = false;
         this.reentrantLock.lock();
         try {
-            if(this.passengerLuggageNumber[pid] == 0) this.passengerLuggageConditions[pid].await();
-            if(this.isPassengerBagInCollectionPoint(pid)) {
-                this.claimBagFromBaggageCollectionPoint(pid);
-                this.repository.passengerCollectingABag(pid);
-                this.passengerLuggageNumber[pid]--;
-                success = true;
+            System.out.println("pid: " + pid + " - " + this.passengerLuggageNumber[pid]);
+            if(!this.noMoreBags) {
+                if (this.passengerLuggageNumber[pid] == 0) this.passengerLuggageConditions[pid].await();
+                if (this.isPassengerBagInCollectionPoint(pid)) {
+                    this.claimBagFromBaggageCollectionPoint(pid);
+                    this.repository.passengerCollectingABag(pid);
+                    this.passengerLuggageNumber[pid]--;
+                    success = true;
+                }
             }
         } catch (Exception e) {
             System.out.println("BCP: goCollectABag: " + e.toString());
@@ -102,6 +107,7 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
             this.repository.porterCarryBagToBaggageCollectionPoint();
             this.bcpBags.add(bagID);
             this.passengerLuggageNumber[bagID]++;
+            System.out.println("Carried BCP bag: " + bagID);
             this.passengerLuggageConditions[bagID].signal();
         } catch (Exception e) {
             System.out.println("BCP: carryItToAppropriateStore: " + e.toString());
@@ -119,6 +125,7 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
         this.reentrantLock.lock();
         try {
             for(Condition c : this.passengerLuggageConditions) c.signal();
+            this.noMoreBags = true;
             this.repository.porterAnnouncingNoMoreBagsToCollect();
         } catch (Exception e) {
             System.out.print("BCP: noMoreBagsToCollect: " + e.toString());

@@ -153,7 +153,9 @@ public class PassengerThread extends Thread {
                 this.alPassenger.goCollectABag(this.pid);
                 System.out.println("PASSENGER " + this.pid + " TRYING TO COLLECT A BAG!");
                 while(this.bcpPassenger.goCollectABag(this.pid)) {
+                    System.out.println("PASSENGER " + this.pid + " COLLECTED A BAG!");
                     this.currentLuggage++;
+                    if(this.currentLuggage == this.luggageAtStart) break;
                 }
                 System.out.println("PASSENGER " + this.pid + " CHECKING IF BAGS MISSING!");
                 if(this.currentLuggage != this.luggageAtStart) {

@@ -111,7 +111,7 @@ public class Repository {
 
             // Porter states +  number of pieces of luggage presently on the conveyor belt + number of pieces of luggage belonging to passengers in transit presently stored at the storeroom
             if(this.porterInitiated) line += this.porterState.toString() + "  " + this.numberOfLuggageOnConveyor + "  " + numberOfLuggageAtTheStoreRoom + "   ";
-            else line += "----  --  --   ";
+            else line += "---- -- --   ";
 
             if(this.busDriverInitiated) line += this.busDriverState.toString() + "   ";
             else line += "----   ";
@@ -358,7 +358,6 @@ public class Repository {
         this.reentrantLock.lock();
         try {
             this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_DEPARTURE_TRANSFER_TERMINAL);
-            // REMOVE FROM BUS
             this.busSeats[seat] = "-";
             this.log();
         } catch (Exception e) {

@@ -26,6 +26,9 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
      * Number of passengers that lef the bus.
      */
     private int passengersThatLeftTheBus;
+
+    private boolean canLeaveTheBus;
+
     /**
      * Instance of the repository.
      */
@@ -41,6 +44,7 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
         this.busDriverCondition = this.reentrantLock.newCondition();
         this.passengersThatArrived = 0;
         this.passengersThatLeftTheBus = 0;
+        this.canLeaveTheBus = false;
         this.repository = repository;
     }
     
@@ -71,7 +75,7 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
     public void leaveTheBus(int pid, int seat) {
         this.reentrantLock.lock();
         try {
-            this.passengerCondition.await();
+            if(!this.canLeaveTheBus) this.passengerCondition.await();
             this.passengersThatLeftTheBus++;
             if(this.passengersThatLeftTheBus == this.passengersThatArrived) this.busDriverCondition.signal();
             this.repository.passengerLeavingTheBus(pid, seat);
@@ -94,7 +98,8 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
             this.repository.busDriverParkingTheBusAndLettingPassengersOff();
             this.passengersThatArrived = passengersThatArrived;
             this.passengerCondition.signalAll();
-            this.busDriverCondition.await();
+            this.canLeaveTheBus = true;
+            if(this.passengersThatLeftTheBus < this.passengersThatArrived) this.busDriverCondition.await();
         } catch(Exception e) {
             System.out.println("DTTQ: parkTheBusAndLetPassOff: " + e.toString());
         } finally {
