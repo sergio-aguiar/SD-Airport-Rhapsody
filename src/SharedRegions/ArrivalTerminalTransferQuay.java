@@ -181,10 +181,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         try {
             do {
                 this.busDriverCondition.awaitNanos(100);
-                if(al.passengersNoLongerNeedTheBus()) {
-                    System.out.print("GOODBYE CRUEL WORLD!");
-                    return false;
-                }
+                if(al.passengersNoLongerNeedTheBus()) return false;
             } while(this.queuedPassengers == 0);
             this.busBoarding = true;
             for(int i = 0; i < this.busSeatNumber && i < this.queuedPassengers; i++) {

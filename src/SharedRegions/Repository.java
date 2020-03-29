@@ -91,14 +91,12 @@ public class Repository {
         //finalReport();
     }
 
-    private boolean close() {
+    private void close() {
         try {
             this.writer.close();
         } catch (IOException ex) {
             Logger.getLogger(Repository.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
         }
-        return true;
     }
     
     private void log() {
@@ -143,7 +141,7 @@ public class Repository {
         }
     }
     
-    private void finalReport (){   
+    public void finalReport (){
         String finalReport = "";      
         finalReport += "Final Report";
         finalReport += "N. of passengers which have this airport as their final destination = " + this.numberOfFDTPassengers + "\n";
@@ -154,7 +152,9 @@ public class Repository {
             this.writer.write((finalReport + "\n"));
         } catch (IOException ex) {
             Logger.getLogger(Repository.class.getName()).log(Level.SEVERE, null, ex);
-        }     
+        }
+
+        this.close();
     }
     private void calculatePassengerSituations() {
         for(PassengerThread.PassengerAndBagSituations situation : this.passengerSituations)

@@ -86,6 +86,7 @@ public class AirportRhapsodyMain {
         porter.start();
 
         for(int flight = 0; flight < k; flight++) {
+            System.out.println("Starting flight " + flight);
             if(flight != 0) {
                 repositoryMonitor.prepareForNextFlight(totalLuggagePerFlight[flight], passengerSituations[flight]);
                 arrivalLoungeMonitor.prepareForNextFLight();
@@ -99,13 +100,21 @@ public class AirportRhapsodyMain {
 
             try {
                 for (PassengerThread passengerThread : passengers[flight]) passengerThread.join();
-                busDriver.join();
-                porter.join();
             } catch(InterruptedException e) {
-                System.err.println(e.toString());
-                System.out.println("ERROR ON THREADS");
+                System.err.println("Main: Interrupted: " + e.toString());
             }
+
+            System.out.println("ENDED A MAIN CYCLE!");
         }
+
+        try {
+            busDriver.join();
+            porter.join();
+        } catch(InterruptedException e) {
+            System.out.println("Main: Interrupted: " + e.toString());
+        }
+
+        repositoryMonitor.finalReport();
     }
 
     private static void generateStartingData() {
