@@ -106,6 +106,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         boolean done = false;
         this.reentrantLock.lock();
         try {
+            this.repository.porterInitiated();
             this.porterCondition.await();
         } catch (Exception e) {
             System.out.println("AL: takeARest: " + e.toString());
@@ -122,6 +123,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     public void whatShouldIDo(int pid) {
         this.reentrantLock.lock();
         try {
+            this.repository.passengerInitiated(pid);
             this.passengersThatArrived++;
             if(this.passengersThatArrived == this.totalPassengers) this.porterCondition.signal();
         } catch (Exception e) {
@@ -140,7 +142,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         String returnVal = "";
         this.reentrantLock.lock();
         try {
-            if(this.luggageNumberPerFlight[this.flightNumber] != this.luggagePickedUp) {
+            if(!this.bagsInThePlane.isEmpty()) {
                 this.repository.porterTryCollectingBagFromPlane(true);
                 System.out.println(this.bagsInThePlane.toString());
                 if(!this.bagsInThePlane.isEmpty()) returnVal = this.bagsInThePlane.pop().toString();

@@ -5,23 +5,29 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import Entities.*;
 
 public class Repository {
 
+    private ReentrantLock reentrantLock;
+
     private int flightNumber;
     private int numberOfLuggageAtThePlane;
 
+    private boolean porterInitiated;
     private PorterThread.PorterStates porterState;
     private int numberOfLuggageOnConveyor;
     private int numberOfLuggageAtTheStoreRoom;
 
+    private boolean busDriverInitiated;
     private BusDriverThread.BusDriverStates busDriverState;
     private String[] busSeats;
     private String[] busWaitingQueue;
 
+    private boolean[] passengersInitiated;
     private PassengerThread.PassengerStates[] passengerStates;
     private PassengerThread.PassengerAndBagSituations[] passengerSituations;
     private int[] passengerLuggageAtStart;
@@ -39,19 +45,25 @@ public class Repository {
                       PassengerThread.PassengerAndBagSituations[] passengerSituations, int[] passengerLuggageAtStart)
             throws IOException {
 
+        this.reentrantLock = new ReentrantLock(true);
+
         this.flightNumber = flightNumber;
         this.numberOfLuggageAtThePlane = numberOfPassengerLuggageAtThePlane;
 
+        this.porterInitiated = false;
         this.porterState = PorterThread.PorterStates.WAITING_FOR_A_PLANE_TO_LAND;
         this.numberOfLuggageAtTheStoreRoom = 0;
         this.numberOfLuggageOnConveyor = 0;
 
+        this.busDriverInitiated = false;
         this.busDriverState = BusDriverThread.BusDriverStates.PARKING_AT_THE_ARRIVAL_TERMINAL;
         this.busSeats = new String[busSeatNumber];
         this.busWaitingQueue = new String[totalPassengers];
         Arrays.fill(this.busSeats, "-");
         Arrays.fill(this.busWaitingQueue, "-");
 
+        this.passengersInitiated = new boolean[totalPassengers];
+        Arrays.fill(this.passengersInitiated, false);
         this.passengerStates = new PassengerThread.PassengerStates[6];
         Arrays.fill(this.passengerStates, PassengerThread.PassengerStates.AT_THE_DISEMBARKING_ZONE);
         this.passengerSituations = passengerSituations;
@@ -90,34 +102,45 @@ public class Repository {
     }
     
     private void log() {
-        
-        String line = "";
-        //Plane number + number of luggage at the planes
-        line += " " + this.flightNumber + "  " + this.numberOfLuggageAtThePlane + "  ";
-        // Porter states +  number of pieces of luggage presently on the conveyor belt + number of pieces of luggage belonging to passengers in transit presently stored at the storeroom
-        line += this.porterState.toString() + "  " + this.numberOfLuggageOnConveyor + "  " + numberOfLuggageAtTheStoreRoom + "   ";
-        
-        line += this.busDriverState.toString() + "   ";
-        for(int i = 0; i < 6; i++)
-            line += this.busWaitingQueue[i] + "  " ;
-        
-        line += "  ";
-        for(int i = 0; i <3; i++)
-            line += this.busSeats[i] + "  ";
-        
-        line += "\n";
-        for(int i = 0; i<6; i++){
-            line += this.passengerStates[i].toString() + " " + this.passengerSituations[i].toString() + "  " + this.passengerLuggageAtStart[i] + "   " + this.passengerLuggageCollected[i] + "  "; 
-        }
-       // line += "\n";   
-
+        this.reentrantLock.lock();
         try {
-            this.writer.write((line + "\n"));
-            this.writer.flush();
-        } catch (IOException ex) {
-            Logger.getLogger(Repository.class.getName()).log(Level.SEVERE, null, ex);
+
+            String line = "";
+            //Plane number + number of luggage at the planes
+            line += " " + this.flightNumber + "  " + this.numberOfLuggageAtThePlane + "  ";
+
+            // Porter states +  number of pieces of luggage presently on the conveyor belt + number of pieces of luggage belonging to passengers in transit presently stored at the storeroom
+            if(this.porterInitiated) line += this.porterState.toString() + "  " + this.numberOfLuggageOnConveyor + "  " + numberOfLuggageAtTheStoreRoom + "   ";
+            else line += "----  --  --   ";
+
+            if(this.busDriverInitiated) line += this.busDriverState.toString() + "   ";
+            else line += "----   ";
+            for(int i = 0; i < 6; i++)
+                line += this.busWaitingQueue[i] + "  " ;
+
+            line += "  ";
+            for(int i = 0; i <3; i++)
+                line += this.busSeats[i] + "  ";
+
+            line += "\n";
+            for(int i = 0; i<6; i++){
+                if(this.passengersInitiated[i]) line += this.passengerStates[i].toString() + " " + this.passengerSituations[i].toString() + "  " + this.passengerLuggageAtStart[i] + "   " + this.passengerLuggageCollected[i] + "  ";
+                else line += "--- ---  -   -  ";
+            }
+            // line += "\n";
+
+            try {
+                this.writer.write((line + "\n"));
+                this.writer.flush();
+            } catch (IOException ex) {
+                Logger.getLogger(Repository.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        } catch (Exception e) {
+            System.out.print("ATTQ: parkTheBus: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
         }
-       
     }
     
     private void finalReport (){   
@@ -156,101 +179,260 @@ public class Repository {
         this.busDriverState = busDriverState;
     }
 
+    public void porterInitiated() {
+        this.reentrantLock.lock();
+        try {
+            this.porterInitiated = true;
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
+    }
+
     public void porterTryCollectingBagFromPlane(boolean success) {
-        this.setPorterState(PorterThread.PorterStates.AT_THE_PLANES_HOLD);
-        if(success) this.numberOfLuggageAtThePlane--;
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setPorterState(PorterThread.PorterStates.AT_THE_PLANES_HOLD);
+            if(success) this.numberOfLuggageAtThePlane--;
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void porterCarryBagToBaggageCollectionPoint() {
-        this.setPorterState(PorterThread.PorterStates.AT_THE_LUGGAGE_BELT_CONVEYOR);
-        this.numberOfLuggageOnConveyor++;
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setPorterState(PorterThread.PorterStates.AT_THE_LUGGAGE_BELT_CONVEYOR);
+            this.numberOfLuggageOnConveyor++;
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void porterCarryBagToTemporaryStorageArea() {
-        this.setPorterState(PorterThread.PorterStates.AT_THE_STOREROOM);
-        this.numberOfLuggageAtTheStoreRoom++;
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setPorterState(PorterThread.PorterStates.AT_THE_STOREROOM);
+            this.numberOfLuggageAtTheStoreRoom++;
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void porterAnnouncingNoMoreBagsToCollect() {
-        this.setPorterState(PorterThread.PorterStates.WAITING_FOR_A_PLANE_TO_LAND);
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setPorterState(PorterThread.PorterStates.WAITING_FOR_A_PLANE_TO_LAND);
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
+    }
+
+    public void passengerInitiated(int pid) {
+        this.reentrantLock.lock();
+        try {
+            this.passengersInitiated[pid] = true;
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void passengerGoingToCollectABag(int pid) {
-        this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_LUGGAGE_COLLECTION_POINT);
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_LUGGAGE_COLLECTION_POINT);
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void passengerCollectingABag(int pid) {
-        this.numberOfLuggageOnConveyor--;
-        this.passengerLuggageCollected[pid]++;
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.numberOfLuggageOnConveyor--;
+            this.passengerLuggageCollected[pid]++;
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void passengerGoingHome(int pid) {
-        this.setPassengerState(pid, PassengerThread.PassengerStates.EXITING_THE_ARRIVAL_TERMINAL);
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setPassengerState(pid, PassengerThread.PassengerStates.EXITING_THE_ARRIVAL_TERMINAL);
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void passengerEnteringTheBus(int pid, int seat) {
-        this.setPassengerState(pid, PassengerThread.PassengerStates.TERMINAL_TRANSFER);
-        this.busSeats[seat] = String.valueOf(pid);
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setPassengerState(pid, PassengerThread.PassengerStates.TERMINAL_TRANSFER);
+            this.busSeats[seat] = String.valueOf(pid);
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void passengerTakingABus(int pid) {
-        this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_ARRIVAL_TRANSFER_TERMINAL);
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_ARRIVAL_TRANSFER_TERMINAL);
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void passengerReportingMissingBags(int pid, int missingBags) {
-        this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_LUGGAGE_RECLAIM_OFFICE);
-        this.numberOfBagsThatWereLost += missingBags;
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_LUGGAGE_RECLAIM_OFFICE);
+            this.numberOfBagsThatWereLost += missingBags;
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void passengerPreparingNextLeg(int pid) {
-        this.setPassengerState(pid, PassengerThread.PassengerStates.ENTERING_THE_DEPARTURE_TERMINAL);
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setPassengerState(pid, PassengerThread.PassengerStates.ENTERING_THE_DEPARTURE_TERMINAL);
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void passengerLeavingTheBus(int pid, int seat) {
-        this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_DEPARTURE_TRANSFER_TERMINAL);
-        this.busSeats[seat] = "-";
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setPassengerState(pid, PassengerThread.PassengerStates.AT_THE_DEPARTURE_TRANSFER_TERMINAL);
+            this.busSeats[seat] = "-";
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void passengerGettingIntoTheWaitingQueue(int pid, int position) {
-        this.busWaitingQueue[position] = String.valueOf(pid);
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.busWaitingQueue[position] = String.valueOf(pid);
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void passengerGettingOutOfTheWaitingQueue(int position) {
-        this.busWaitingQueue[position] = "-";
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.busWaitingQueue[position] = "-";
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
+    }
+
+    public void busDriverInitiated() {
+        this.reentrantLock.lock();
+        try {
+            this.busDriverInitiated = true;
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void busDriverParkingTheBus() {
-        this.setBusDriverState(BusDriverThread.BusDriverStates.PARKING_AT_THE_ARRIVAL_TERMINAL);
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setBusDriverState(BusDriverThread.BusDriverStates.PARKING_AT_THE_ARRIVAL_TERMINAL);
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void busDriverGoingToDepartureTerminal() {
-        this.setBusDriverState(BusDriverThread.BusDriverStates.DRIVING_FORWARD);
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setBusDriverState(BusDriverThread.BusDriverStates.DRIVING_FORWARD);
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void busDriverGoingToArrivalTerminal() {
-        this.setBusDriverState(BusDriverThread.BusDriverStates.DRIVING_BACKWARD);
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setBusDriverState(BusDriverThread.BusDriverStates.DRIVING_BACKWARD);
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 
     public void busDriverParkingTheBusAndLettingPassengersOff() {
-        this.setBusDriverState(BusDriverThread.BusDriverStates.PARKING_AT_THE_DEPARTURE_TERMINAL);
-        this.log();
+        this.reentrantLock.lock();
+        try {
+            this.setBusDriverState(BusDriverThread.BusDriverStates.PARKING_AT_THE_DEPARTURE_TERMINAL);
+            this.log();
+        } catch (Exception e) {
+            System.out.print("Repository: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
     }
 }
 

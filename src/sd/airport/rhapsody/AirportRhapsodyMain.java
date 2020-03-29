@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Random;
 
 public class AirportRhapsodyMain {
 
@@ -94,13 +95,15 @@ public class AirportRhapsodyMain {
     }
 
     private static void generateStartingData() {
+        Random random = new Random();
         for(int flight = 0; flight < k; flight++) {
             for(int passenger = 0; passenger < n; passenger++) {
-                passengerSituations[flight][passenger] = (Math.random() < FDTProb)
+                passengerSituations[flight][passenger] = (random.nextDouble() < FDTProb)
                         ? PassengerThread.PassengerAndBagSituations.FDT : PassengerThread.PassengerAndBagSituations.TRT;
-                passengerLuggage[flight][passenger] = (int) (Math.random() * m);
+                passengerLuggage[flight][passenger] = random.nextInt(m + 1);
+                int bound = (passengerLuggage[flight][passenger] == 0) ? 1 : passengerLuggage[flight][passenger];
                 passengerLuggageAfterMissing[flight][passenger] = passengerLuggage[flight][passenger]
-                        - (int) (Math.random() * passengerLuggage[flight][passenger]);
+                        - random.nextInt(bound);
                 totalLuggagePerFlight[flight] += passengerLuggageAfterMissing[flight][passenger];
 
                 for(int bag = 0; bag < passengerLuggageAfterMissing[flight][passenger]; bag++) {

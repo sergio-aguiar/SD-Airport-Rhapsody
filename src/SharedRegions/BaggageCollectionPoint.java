@@ -5,6 +5,7 @@ import Interfaces.BCPPassenger;
 import Interfaces.BCPPorter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -16,7 +17,9 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
 
     private final ReentrantLock reentrantLock;
     private final Condition[] passengerLuggageConditions;
-    
+
+    private final int[] passengerLuggageNumber;
+
     /**
      * Arraylist of bags int he colection point.
      */
@@ -35,6 +38,8 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
         this.reentrantLock = new ReentrantLock(true);
         this.passengerLuggageConditions = new Condition[totalPassengers];
         for(int c = 0; c < totalPassengers; c++) this.passengerLuggageConditions[c] = this.reentrantLock.newCondition();
+        this.passengerLuggageNumber = new int[totalPassengers];
+        Arrays.fill(this.passengerLuggageNumber, 0);
         this.bcpBags = new ArrayList<>();
         this.repository = repository;
     }
@@ -70,10 +75,11 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
         boolean success = false;
         this.reentrantLock.lock();
         try {
-            this.passengerLuggageConditions[pid].await();
+            if(this.passengerLuggageNumber[pid] == 0) this.passengerLuggageConditions[pid].await();
             if(this.isPassengerBagInCollectionPoint(pid)) {
                 this.claimBagFromBaggageCollectionPoint(pid);
                 this.repository.passengerCollectingABag(pid);
+                this.passengerLuggageNumber[pid]--;
                 success = true;
             }
         } catch (Exception e) {
@@ -95,6 +101,7 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
         try {
             this.repository.porterCarryBagToBaggageCollectionPoint();
             this.bcpBags.add(bagID);
+            this.passengerLuggageNumber[bagID]++;
             this.passengerLuggageConditions[bagID].signal();
         } catch (Exception e) {
             System.out.println("BCP: carryItToAppropriateStore: " + e.toString());

@@ -212,6 +212,14 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
      */
     @Override
     public boolean hasDaysWorkEnded() {
+        this.reentrantLock.lock();
+        try {
+            this.repository.busDriverInitiated();
+        } catch (Exception e) {
+            System.out.print("ATTQ: parkTheBus: " + e.toString());
+        } finally {
+            this.reentrantLock.unlock();
+        }
         return false;
     }
     
@@ -264,7 +272,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         this.reentrantLock.lock();
         try {
             this.repository.busDriverGoingToDepartureTerminal();
-            busPassengers = this.numberOfPassengersInBus();
+            busPassengers = this.passengersInBus;
         } catch (Exception e) {
             System.out.println("ATTQ: goToDepartureTerminal: " + e.toString());
         } finally {
