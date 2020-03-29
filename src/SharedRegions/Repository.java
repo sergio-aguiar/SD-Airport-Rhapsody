@@ -437,5 +437,24 @@ public class Repository {
             this.reentrantLock.unlock();
         }
     }
+
+    public void prepareForNextFlight(int numberOfPassengerLuggageAtThePlane, PassengerThread.PassengerAndBagSituations[]
+                                     passengerSituations) {
+        this.flightNumber++;
+        this.numberOfLuggageAtThePlane = numberOfPassengerLuggageAtThePlane;
+        this.porterState = PorterThread.PorterStates.WAITING_FOR_A_PLANE_TO_LAND;
+        this.numberOfLuggageAtTheStoreRoom = 0;
+        this.numberOfLuggageOnConveyor = 0;
+        this.busDriverState = BusDriverThread.BusDriverStates.PARKING_AT_THE_ARRIVAL_TERMINAL;
+        Arrays.fill(this.busSeats, "-");
+        Arrays.fill(this.busWaitingQueue, "-");
+        Arrays.fill(this.passengersInitiated, false);
+        Arrays.fill(this.passengerStates, PassengerThread.PassengerStates.AT_THE_DISEMBARKING_ZONE);
+        this.passengerSituations = passengerSituations;
+        Arrays.fill(this.passengerLuggageCollected, 0);
+        this.calculatePassengerSituations();
+        this.calculateBagsThatShouldHaveBeenOnThePlane();
+        this.numberOfBagsThatWereLost = 0;
+    }
 }
 

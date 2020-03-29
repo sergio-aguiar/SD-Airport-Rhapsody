@@ -66,7 +66,11 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
                 break;
             }
     }
-    
+
+    public void prepareForNextFLight() {
+        Arrays.fill(this.passengerLuggageNumber, 0);
+    }
+
     /**
      * Passenger method: the passenger go collect a bag from the collection point.
      * @param pid passenger id.

@@ -69,16 +69,23 @@ public class PorterThread extends Thread {
      */
    @Override
     public void run() {
+        System.out.println("PORTER STARTED!");
         while(!this.alPorter.takeARest(this.pid)) {
+            System.out.println("PORTER TRYING TO COLLECT A BAG!");
             String tmpBag = this.alPorter.tryToCollectABag(this.pid);
             while(!tmpBag.equals("")) {
                 this.bagData = tmpBag.split(",");
+                System.out.println("PORTER DECIDING WHERE TO CARRY THE BAG TO!");
                 if(this.bagData[1].equals(PassengerThread.PassengerAndBagSituations.FDT.toString()))
                     this.bcpPorter.carryItToAppropriateStore(this.pid, Integer.parseInt(this.bagData[0]));
                 else this.tsaPorter.carryItToAppropriateStore(this.pid, Integer.parseInt(this.bagData[0]));
+                System.out.println("PORTER CARRIED THE BAG!");
                 tmpBag = this.alPorter.tryToCollectABag(this.pid);
+                System.out.println("PORTER TRIED TO COLLECT ANOTHER BAG!");
             }
+            System.out.println("PORTER ANNOUNCING NO MORE BAGS!");
             this.bcpPorter.noMoreBagsToCollect(this.pid);
         }
+       System.out.println("PORTER DIED!");
     }
 }

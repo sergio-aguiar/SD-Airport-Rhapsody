@@ -15,7 +15,7 @@ import java.util.Random;
 
 public class AirportRhapsodyMain {
 
-    private static final int k = 1; // K plane landings
+    private static final int k = 2; // K plane landings
     private static final int n = 6; // N passengers
     private static final int m = 2; // 0 to M luggage per passenger
     private static final int t = 3; // T bus seats
@@ -24,7 +24,7 @@ public class AirportRhapsodyMain {
 
     private static int flightNumber = 0;
 
-    private static PassengerThread[] passengers = new PassengerThread[n];
+    private static PassengerThread[][] passengers = new PassengerThread[k][n];
     private static BusDriverThread busDriver;
     private static PorterThread porter;
 
@@ -53,8 +53,7 @@ public class AirportRhapsodyMain {
             repositoryMonitor = new Repository(0, totalLuggagePerFlight[0], t, n, passengerSituations[0],
                     passengerLuggage[0]);
         } catch (IOException e) {
-            System.err.println(e.toString());
-            System.out.println("Repository Error!");
+            System.err.println("Main: Starting the repository: " + e.toString());
         }
 
         arrivalLoungeMonitor = new ArrivalLounge(repositoryMonitor, n, k, totalLuggagePerFlight, passengerBags);
@@ -73,24 +72,39 @@ public class AirportRhapsodyMain {
         busDriver = new BusDriverThread(0, arrivalTerminalTransferQuayMonitor, departureTerminalTransferQuayMonitor);
         porter = new PorterThread(0, arrivalLoungeMonitor, baggageCollectionPointMonitor, temporaryStorageAreaMonitor);
 
-        for(int passenger = 0; passenger < n; passenger++) {
-            passengers[passenger] = new PassengerThread(passenger, passengerLuggage[0][passenger],
-                    passengerSituations[0][passenger], arrivalLoungeMonitor, arrivalTerminalExitMonitor,
-                    arrivalTerminalTransferQuayMonitor, baggageCollectionPointMonitor, departureTerminalEntranceMonitor,
-                    departureTerminalTransferQuayMonitor,  baggageReclaimOfficeMonitor);
+
+        for(int f = 0; f < k; f++) {
+            for(int passenger = 0; passenger < n; passenger++) {
+                passengers[f][passenger] = new PassengerThread(passenger, passengerLuggage[f][passenger],
+                        passengerSituations[f][passenger], arrivalLoungeMonitor, arrivalTerminalExitMonitor,
+                        arrivalTerminalTransferQuayMonitor, baggageCollectionPointMonitor, departureTerminalEntranceMonitor,
+                        departureTerminalTransferQuayMonitor, baggageReclaimOfficeMonitor);
+            }
         }
 
         busDriver.start();
         porter.start();
-        for(PassengerThread passengerThread : passengers) passengerThread.start();
 
-        try {
-            for (PassengerThread passengerThread : passengers) passengerThread.join();
-            busDriver.join();
-            porter.join();
-        } catch(InterruptedException e) {
-            System.err.println(e.toString());
-            System.out.println("ERROR ON THREADS");
+        for(int flight = 0; flight < k; flight++) {
+            if(flight != 0) {
+                repositoryMonitor.prepareForNextFlight(totalLuggagePerFlight[flight], passengerSituations[flight]);
+                arrivalLoungeMonitor.prepareForNextFLight();
+                arrivalTerminalTransferQuayMonitor.prepareForNextFLight();
+                baggageCollectionPointMonitor.prepareForNextFLight();
+                departureTerminalTransferQuayMonitor.prepareForNextFLight();
+                temporaryStorageAreaMonitor.prepareForNextFlight();
+            }
+
+            for(PassengerThread passengerThread : passengers[flight]) passengerThread.start();
+
+            try {
+                for (PassengerThread passengerThread : passengers[flight]) passengerThread.join();
+                busDriver.join();
+                porter.join();
+            } catch(InterruptedException e) {
+                System.err.println(e.toString());
+                System.out.println("ERROR ON THREADS");
+            }
         }
     }
 

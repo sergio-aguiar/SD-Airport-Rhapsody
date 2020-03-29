@@ -37,7 +37,7 @@ public class TemporaryStorageArea implements TSAPorter {
     /**
      * removes all the bags from the temporary storage area.
      */
-    public void nextFlight() {
+    public void prepareForNextFlight() {
         this.tsaBags.clear();
     }
     

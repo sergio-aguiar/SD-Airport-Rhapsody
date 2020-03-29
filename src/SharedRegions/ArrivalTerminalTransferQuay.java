@@ -161,7 +161,16 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         this.passengersInBus++;
         return this.passengersInBus - 1;
     }
-    
+
+    public void prepareForNextFLight() {
+        this.queuedPassengers = 0;
+        this.passengersInBus = 0;
+        this.passengersSignaled = 0;
+        this.busBoarding = false;
+        Arrays.fill(this.busSeats, "-");
+        Arrays.fill(this.busWaitingQueue, "-");
+    }
+
     /**
      * Bus driver method: the Bus driver announces the bus boarding. 
      *

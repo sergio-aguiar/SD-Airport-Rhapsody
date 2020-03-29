@@ -80,8 +80,6 @@ public class ArrivalTerminalExit implements ATEPassenger {
         }
     }
 
-
-
     /**
      * Passenger method: go home.
      * @param pid passenger id.

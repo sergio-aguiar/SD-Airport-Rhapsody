@@ -47,7 +47,13 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
         this.canLeaveTheBus = false;
         this.repository = repository;
     }
-    
+
+    public void prepareForNextFLight() {
+        this.passengersThatArrived = 0;
+        this.passengersThatLeftTheBus = 0;
+        this.canLeaveTheBus = false;
+    }
+
     /**
      * Bus Driver method: The bus driver go to arrival terminal.
      * @param bid bus driver id.

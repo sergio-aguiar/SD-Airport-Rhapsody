@@ -97,9 +97,11 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     /**
      * Incremet the flight number to the next flight.
      */
-    public void nextFlight() {
+    public void prepareForNextFLight() {
+        this.passengersThatArrived = 0;
         this.flightNumber++;
         this.bagArrayToStack(this.flightNumber);
+        this.luggagePickedUp = 0;
     }
 
     public boolean passengersNoLongerNeedTheBus() {
