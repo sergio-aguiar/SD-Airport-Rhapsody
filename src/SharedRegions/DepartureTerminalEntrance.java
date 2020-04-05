@@ -80,6 +80,7 @@ public class DepartureTerminalEntrance implements DTEPassenger {
     public void signalWaitingPassengers() {
         this.reentrantLock.lock();
         try {
+            this.allSignaled = true;
             this.passengerCondition.signalAll();
         } catch (Exception e) {
             System.out.println("DTE: signalWaitingPassengers: " + e.toString());
@@ -108,9 +109,10 @@ public class DepartureTerminalEntrance implements DTEPassenger {
      */
     @Override
     public void prepareNextLeg(int pid) {
+        this.repository.passengerPreparingNextLeg(pid);
+
         this.reentrantLock.lock();
         try {
-            System.out.println("PASSENGER " + pid + " INCREMENTED DTE!");
             this.waitingPassengers++;
         } catch (Exception e) {
             System.out.println("DTE1: goHome: " + e.toString());
@@ -118,34 +120,18 @@ public class DepartureTerminalEntrance implements DTEPassenger {
             this.reentrantLock.unlock();
         }
 
-        System.out.println("PASSENGER " + pid + " GETTING ATE WAITING PASSENGERS!");
         int ateWaitingPassengers = this.ate.getWaitingPassengers();
-        System.out.println("PASSENGER " + pid + " GOT : " + ateWaitingPassengers + " ATE WAITING!");
+        if(this.waitingPassengers + ateWaitingPassengers == this.totalPassengers) this.allSignaled = true;
 
         this.reentrantLock.lock();
         try {
-            if(allDone == -1 && !allSignaled) {
-                if(this.waitingPassengers + ateWaitingPassengers == this.totalPassengers) this.allDone = pid;
-                else this.passengerCondition.await();
-            }
+            if(this.allSignaled) this.passengerCondition.signalAll();
+            else this.passengerCondition.await();
         } catch (Exception e) {
             System.out.println("DTE2: goHome: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
-
-        this.reentrantLock.lock();
-        try {
-            if(allDone == pid) {
-                allSignaled = true;
-                System.out.println("PASSENGER " + pid + " SIGNALING EVERYONE!");
-                this.ate.signalWaitingPassengers();
-                this.passengerCondition.signalAll();
-            }
-        } catch (Exception e) {
-            System.out.println("DTE3: goHome: " + e.toString());
-        } finally {
-            this.reentrantLock.unlock();
-        }
+        if(this.allSignaled) this.ate.signalWaitingPassengers();
     }
 }

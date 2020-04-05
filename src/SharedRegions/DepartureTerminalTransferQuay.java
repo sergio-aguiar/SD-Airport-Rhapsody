@@ -36,6 +36,9 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
      * Attribute that states whether the passengers can leave the bus or not.
      */
     private boolean canLeaveTheBus;
+
+    private int flightNumber;
+
     /**
      * The class's Repository instance.
      */
@@ -51,15 +54,17 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
         this.passengersThatArrived = 0;
         this.passengersThatLeftTheBus = 0;
         this.canLeaveTheBus = false;
+        this.flightNumber = 0;
         this.repository = repository;
     }
     /**
      * Function that allows for a transition to a new flight (new plane landing simulation).
      */
-    public void prepareForNextFLight() {
+    public void prepareForNextFlight() {
         this.passengersThatArrived = 0;
         this.passengersThatLeftTheBus = 0;
         this.canLeaveTheBus = false;
+        this.flightNumber++;
     }
     /**
      * The bus driver drives towards the Arrival Terminal Transfer Quay.
@@ -102,18 +107,19 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
      * @param passengersThatArrived The number of passengers that arrived aboard the bus.
      */
     @Override
-    public void parkTheBusAndLetPassOff(int bid, int passengersThatArrived) {
+    public int parkTheBusAndLetPassOff(int bid, int passengersThatArrived, int flightNumber) {
         this.reentrantLock.lock();
         try {
             this.repository.busDriverParkingTheBusAndLettingPassengersOff();
             this.passengersThatArrived = passengersThatArrived;
             this.passengerCondition.signalAll();
             this.canLeaveTheBus = true;
-            if(this.passengersThatLeftTheBus < this.passengersThatArrived) this.busDriverCondition.await();
+            if(this.passengersThatLeftTheBus < this.passengersThatArrived && this.flightNumber == flightNumber) this.busDriverCondition.await();
         } catch(Exception e) {
             System.out.println("DTTQ: parkTheBusAndLetPassOff: " + e.toString());
         } finally {
             this.reentrantLock.unlock();
         }
+        return this.flightNumber;
     }
 }

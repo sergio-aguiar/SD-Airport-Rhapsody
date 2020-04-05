@@ -22,6 +22,10 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
      */
     private final Condition busQueueCondition;
     /**
+     * The Condition instance where the passengers wait for the bus driver to signal that the bus has left.
+     */
+    private final Condition busLeavingCondition;
+    /**
      * The Condition instance where bus driver awaits for queued passengers and for them to later enter the bus.
      */
     private final Condition busDriverCondition;
@@ -75,6 +79,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
     public ArrivalTerminalTransferQuay(Repository repository, int totalPassengers, int busSeatNumber, ArrivalLounge al){
         this.reentrantLock = new ReentrantLock(true);
         this.busQueueCondition = this.reentrantLock.newCondition();
+        this.busLeavingCondition = this.reentrantLock.newCondition();
         this.busDriverCondition = this.reentrantLock.newCondition();
         this.totalPassengers = totalPassengers;
         this.busSeatNumber = busSeatNumber;
@@ -153,7 +158,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
     /**
      * Function that allows for a transition to a new flight (new plane landing simulation).
      */
-    public void prepareForNextFLight() {
+    public void prepareForNextFlight() {
         this.queuedPassengers = 0;
         this.passengersInBus = 0;
         this.passengersSignaled = 0;
@@ -196,9 +201,9 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
         try {
             this.getOutOfQueue(pid);
             busSeat = this.getIntoBus(pid);
-            if(this.passengersInBus == this.passengersSignaled)
-                this.busDriverCondition.signal();
+            if(this.passengersInBus == this.passengersSignaled) this.busDriverCondition.signal();
             this.repository.passengerEnteringTheBus(pid, this.passengersInBus - 1);
+            this.busLeavingCondition.await();
         } catch (Exception e) {
             System.out.println("ATTQ: enterTheBus: " + e.toString());
         } finally {
@@ -274,6 +279,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
             busPassengers = this.passengersInBus;
             for(int i = 0; i < busPassengers; i++) al.incrementCrossFlightPassengerCount();
             this.repository.busDriverGoingToDepartureTerminal();
+            this.busLeavingCondition.signalAll();
         } catch (Exception e) {
             System.out.println("ATTQ: goToDepartureTerminal: " + e.toString());
         } finally {

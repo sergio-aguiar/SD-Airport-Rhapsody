@@ -11,7 +11,7 @@ public interface DTTQBusDriver {
      * @param bid The bus driver's ID.
      * @param passengersThatArrived The number of passengers that arrived aboard the bus.
      */
-    public void parkTheBusAndLetPassOff(int bid, int passengersThatArrived);
+    public int parkTheBusAndLetPassOff(int bid, int passengersThatArrived, int flightNumber);
 	 /**
      * The bus driver drives towards the Arrival Terminal Transfer Quay.
      * @param bid The bus driver's ID.

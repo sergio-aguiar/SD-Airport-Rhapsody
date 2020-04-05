@@ -104,7 +104,7 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
     /**
      * Function that allows for a transition to a new flight (new plane landing simulation).
      */
-    public void prepareForNextFLight() {
+    public void prepareForNextFlight() {
         this.passengersThatArrived = 0;
         this.flightNumber++;
         this.bagArrayToStack(this.flightNumber);

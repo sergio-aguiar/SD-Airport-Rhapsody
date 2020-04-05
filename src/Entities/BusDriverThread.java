@@ -50,8 +50,9 @@ public class BusDriverThread extends Thread {
      * Number of passengers being taken in the bus.
      */
     private int passengersBeingTaken;
-	
-	 
+
+    private int flightNumber;
+
     /**
      * Constructor: Bus Driver
      * @param bid Bus Driver's ID.
@@ -63,6 +64,7 @@ public class BusDriverThread extends Thread {
         this.attqBusDriver = attq;
         this.dttqBusDriver = dttq;
         this.passengersBeingTaken = 0;
+        this.flightNumber = 0;
     }
 	/**
      * Executes the Bus Driver's life-cycle.
@@ -72,7 +74,7 @@ public class BusDriverThread extends Thread {
         while(!this.attqBusDriver.hasDaysWorkEnded()) {
             if(!this.attqBusDriver.announcingBusBoarding()) break;
             this.passengersBeingTaken = this.attqBusDriver.goToDepartureTerminal(this.bid);
-            this.dttqBusDriver.parkTheBusAndLetPassOff(this.bid, this.passengersBeingTaken);
+            this.flightNumber = this.dttqBusDriver.parkTheBusAndLetPassOff(this.bid, this.passengersBeingTaken, this.flightNumber);
             this.dttqBusDriver.goToArrivalTerminal(this.bid);
             this.attqBusDriver.parkTheBus(this.bid);
         }

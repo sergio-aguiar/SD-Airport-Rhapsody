@@ -15,7 +15,7 @@ import java.util.Random;
 
 public class AirportRhapsodyMain {
 
-    private static final int k = 2; // K plane landings
+    private static final int k = 1000; // K plane landings
     private static final int n = 6; // N passengers
     private static final int m = 2; // 0 to M luggage per passenger
     private static final int t = 3; // T bus seats
@@ -89,12 +89,12 @@ public class AirportRhapsodyMain {
             System.out.println("Starting flight " + flight);
             if(flight != 0) {
                 repositoryMonitor.prepareForNextFlight(totalLuggagePerFlight[flight], passengerSituations[flight]);
-                arrivalLoungeMonitor.prepareForNextFLight();
+                arrivalLoungeMonitor.prepareForNextFlight();
                 arrivalTerminalExitMonitor.prepareForNextFlight();
-                arrivalTerminalTransferQuayMonitor.prepareForNextFLight();
-                baggageCollectionPointMonitor.prepareForNextFLight();
+                arrivalTerminalTransferQuayMonitor.prepareForNextFlight();
+                baggageCollectionPointMonitor.prepareForNextFlight();
                 departureTerminalEntranceMonitor.prepareForNextFlight();
-                departureTerminalTransferQuayMonitor.prepareForNextFLight();
+                departureTerminalTransferQuayMonitor.prepareForNextFlight();
                 temporaryStorageAreaMonitor.prepareForNextFlight();
             }
 

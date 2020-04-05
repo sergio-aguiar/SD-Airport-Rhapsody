@@ -76,7 +76,7 @@ public class BaggageCollectionPoint implements BCPPassenger, BCPPorter {
     /**
      * Function that allows for a transition to a new flight (new plane landing simulation).
      */
-    public void prepareForNextFLight() {
+    public void prepareForNextFlight() {
         Arrays.fill(this.passengerLuggageNumber, 0);
     }
     /**
