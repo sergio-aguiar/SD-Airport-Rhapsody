@@ -13,6 +13,7 @@ public interface ATTQBusDriver {
     public boolean hasDaysWorkEnded();
 	/**
      * The bus driver announces that the bus is boarding after seeing that at least one passenger is in queue.
+     * @return false if no other future passengers need the bus driver's services and true otherwise.
      */
     public boolean announcingBusBoarding();
 	/**

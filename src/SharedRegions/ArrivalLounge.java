@@ -47,10 +47,6 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
      */
     private int totalFlights;
     /**
-     * Array that contains the amount of luggage coming inside of every plane (every flight).
-     */
-    private final int[] luggageNumberPerFlight;
-    /**
      * Array that contains the bags of each passenger per flight.
      */
     private final Bag[][][] luggagePerFlight;
@@ -58,10 +54,6 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
      * Stack that contains the bags currently in the plane.
      */
     private Stack<Bag> bagsInThePlane;
-    /**
-     * Number of luggage currently picked up by the porter.
-     */
-    private int luggagePickedUp;
     /**
      * The class's Repository instance.
      */
@@ -71,11 +63,9 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
      * @param repository A reference to a repository object.
      * @param totalPassengers Total number of passengers per flight.
      * @param totalFlights Total number of flights.
-     * @param luggageNumberPerFlight Array that contains the amount of luggage coming inside of every plane (every flight).
      * @param luggagePerFlight Array that contains the bags of each passenger per flight.
      */
-    public ArrivalLounge(Repository repository, int totalPassengers, int totalFlights, int[] luggageNumberPerFlight,
-                         Bag[][][] luggagePerFlight) {
+    public ArrivalLounge(Repository repository, int totalPassengers, int totalFlights, Bag[][][] luggagePerFlight) {
         this.reentrantLock = new ReentrantLock();
         this.porterCondition = this.reentrantLock.newCondition();
         this.maxCrossFlightPassengers = totalFlights * totalPassengers;
@@ -84,11 +74,9 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.totalFlights = totalFlights;
         this.passengersThatArrived = 0;
         this.flightNumber = 0;
-        this.luggageNumberPerFlight = luggageNumberPerFlight;
         this.luggagePerFlight = luggagePerFlight;
         this.bagsInThePlane = new Stack<>();
         this.bagArrayToStack(0);
-        this.luggagePickedUp = 0;
         this.repository = repository;
     }
     /**
@@ -108,7 +96,6 @@ public class ArrivalLounge implements ALPassenger, ALPorter {
         this.passengersThatArrived = 0;
         this.flightNumber++;
         this.bagArrayToStack(this.flightNumber);
-        this.luggagePickedUp = 0;
     }
     /**
      * Function that verifies if any more passengers in the future need the bus driver's services.

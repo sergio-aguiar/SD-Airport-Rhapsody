@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
 /**Baggage Collection Point: Where passengers pick up their luggage and where the porter leaves final destination luggage.
  * Used by PORTER and PASSENGER.
  * @author sergiaguiar

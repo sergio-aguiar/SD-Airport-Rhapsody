@@ -14,6 +14,7 @@ public interface ATTQPassenger {
     /**
      * The Passenger leaves the waiting queue and enters the bus.
      * @param pid The passenger's ID.
+     * @return the passenger's seat on the bus.
      */
     public int enterTheBus(int pid);
 }

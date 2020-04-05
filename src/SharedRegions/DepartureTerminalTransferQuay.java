@@ -36,9 +36,10 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
      * Attribute that states whether the passengers can leave the bus or not.
      */
     private boolean canLeaveTheBus;
-
+    /**
+     * The current flight number.
+     */
     private int flightNumber;
-
     /**
      * The class's Repository instance.
      */
@@ -86,6 +87,7 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
     /**
      * The passenger leaves the bus and signals the bus driver if he's the last one to do so.
      * @param pid The passenger's ID.
+     * @param seat The passenger's bus seat.
      */
     @Override
     public void leaveTheBus(int pid, int seat) {
@@ -105,6 +107,8 @@ public class DepartureTerminalTransferQuay implements DTTQPassenger, DTTQBusDriv
      * The bus driver parks the Bus and let's teh passengers off.
      * @param bid The bus driver's ID.
      * @param passengersThatArrived The number of passengers that arrived aboard the bus.
+     * @param flightNumber The bus driver's estimated flight number.
+     * @return The current flight number.
      */
     @Override
     public int parkTheBusAndLetPassOff(int bid, int passengersThatArrived, int flightNumber) {

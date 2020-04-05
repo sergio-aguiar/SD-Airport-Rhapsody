@@ -6,7 +6,6 @@ import Interfaces.ATTQPassenger;
 import java.util.Arrays;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
 /** Arrival Terminal Transfer Quay: Where passengers await the bus to transfer terminals and the bus driver awaits them.
  * Used by PASSENGER and BUS DRIVER.
  * @author sergiaguiar
@@ -69,12 +68,12 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
      * The class's Repository instance.
      */
     private final Repository repository;
-    
     /**
      * Arrival Terminal Transfer Quay constructor.
      * @param repository repository.
      * @param totalPassengers Number of total passengers.
      * @param busSeatNumber Bus seat number.
+     * @param al The class's ArrivalLounge instance.
      */
     public ArrivalTerminalTransferQuay(Repository repository, int totalPassengers, int busSeatNumber, ArrivalLounge al){
         this.reentrantLock = new ReentrantLock(true);
@@ -168,6 +167,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
     }
     /**
      * The bus driver announces that the bus is boarding after seeing that at least one passenger is in queue.
+     * @return false if no other future passengers need the bus driver's services and true otherwise.
      */
     @Override
     public boolean announcingBusBoarding() {
@@ -193,6 +193,7 @@ public class ArrivalTerminalTransferQuay implements ATTQPassenger, ATTQBusDriver
     /**
      * The Passenger leaves the waiting queue and enters the bus.
      * @param pid The passenger's ID.
+     * @return the passenger's seat on the bus.
      */
     @Override
     public int enterTheBus(int pid) {

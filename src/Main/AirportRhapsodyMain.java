@@ -4,74 +4,96 @@ import Entities.BusDriverThread;
 import Entities.PassengerThread;
 import Entities.PorterThread;
 import Extras.Bag;
-import Interfaces.*;
 import SharedRegions.*;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Random;
-
+/**
+ * AirportRhapsodyMain : The project's main file.
+ *
+ * @author sergiaguiar
+ * @author marcomacedo
+ */
 public class AirportRhapsodyMain {
-
-    private static final int k = 1000; // K plane landings
-    private static final int n = 6; // N passengers
-    private static final int m = 2; // 0 to M luggage per passenger
-    private static final int t = 3; // T bus seats
-
-    private static final double FDTProb = 0.5;
-
-    private static int flightNumber = 0;
-
+    /**
+     * The number of plane landings.
+     */
+    private static final int k = 5;
+    /**
+     * The number of passengers.
+     */
+    private static final int n = 6;
+    /**
+     * The maximum number of luggage a passenger can carry.
+     */
+    private static final int m = 2;
+    /**
+     * The number of seats on the bus.
+     */
+    private static final int t = 3;
+    /**
+     * The probability of a passenger currently being at their final destination.
+     */
+    private static final double probFDT = 0.5;
+    /**
+     * The array that contains every flight's passenger threads.
+     */
     private static PassengerThread[][] passengers = new PassengerThread[k][n];
-    private static BusDriverThread busDriver;
-    private static PorterThread porter;
-
+    /**
+     * The array that contains every flight's passenger's flight situations.
+     */
     private static final PassengerThread.PassengerAndBagSituations[][] passengerSituations
             = new PassengerThread.PassengerAndBagSituations[k][n];
+    /**
+     * The array that contains every flight's passenger's total amount of luggage.
+     */
     private static final int[][] passengerLuggage = new int[k][n];
+    /**
+     * The array that contains every flight's passenger's total amount of luggage after some went missing.
+     */
     private static final int[][] passengerLuggageAfterMissing = new int[k][n];
+    /**
+     * The array that contains every flight's passenger's bags.
+     */
     private static Bag[][][] passengerBags = new Bag[k][n][m];
+    /**
+     * The array that contains every flight's amount of bags.
+     */
     private static final int[] totalLuggagePerFlight = new int[k];
-
-    private static ArrivalLounge arrivalLoungeMonitor;
-    private static ArrivalTerminalExit arrivalTerminalExitMonitor;
-    private static ArrivalTerminalTransferQuay arrivalTerminalTransferQuayMonitor;
-    private static BaggageCollectionPoint baggageCollectionPointMonitor;
-    private static BaggageReclaimOffice baggageReclaimOfficeMonitor;
-    private static DepartureTerminalEntrance departureTerminalEntranceMonitor;
-    private static DepartureTerminalTransferQuay departureTerminalTransferQuayMonitor;
+    /**
+     * The class's Repository instance.
+     */
     private static Repository repositoryMonitor;
-    private static TemporaryStorageArea temporaryStorageAreaMonitor;
-
+    /**
+     * The class's main function.
+     * @param args The function's command line arguments (not used).
+     */
     public static void main(String[] args) {
         Arrays.fill(totalLuggagePerFlight, 0);
         generateStartingData();
 
         try {
             repositoryMonitor = new Repository(0, totalLuggagePerFlight[0], t, n, passengerSituations[0],
-                    passengerLuggage[0]);
+                    passengerLuggage[0], passengerBags);
         } catch (IOException e) {
             System.err.println("Main: Starting the repository: " + e.toString());
         }
 
-        arrivalLoungeMonitor = new ArrivalLounge(repositoryMonitor, n, k, totalLuggagePerFlight, passengerBags);
-        arrivalTerminalExitMonitor = new ArrivalTerminalExit(repositoryMonitor, n);
-        arrivalTerminalTransferQuayMonitor = new ArrivalTerminalTransferQuay(repositoryMonitor, n, t, arrivalLoungeMonitor);
-        baggageCollectionPointMonitor = new BaggageCollectionPoint(repositoryMonitor, n);
-        baggageReclaimOfficeMonitor = new BaggageReclaimOffice(repositoryMonitor);
-        departureTerminalEntranceMonitor = new DepartureTerminalEntrance(repositoryMonitor, n);
-        departureTerminalTransferQuayMonitor = new DepartureTerminalTransferQuay(repositoryMonitor);
-        temporaryStorageAreaMonitor = new TemporaryStorageArea(repositoryMonitor);
+        ArrivalLounge arrivalLoungeMonitor = new ArrivalLounge(repositoryMonitor, n, k, passengerBags);
+        ArrivalTerminalExit arrivalTerminalExitMonitor = new ArrivalTerminalExit(repositoryMonitor, n);
+        ArrivalTerminalTransferQuay arrivalTerminalTransferQuayMonitor = new ArrivalTerminalTransferQuay(repositoryMonitor, n, t, arrivalLoungeMonitor);
+        BaggageCollectionPoint baggageCollectionPointMonitor = new BaggageCollectionPoint(repositoryMonitor, n);
+        BaggageReclaimOffice baggageReclaimOfficeMonitor = new BaggageReclaimOffice(repositoryMonitor);
+        DepartureTerminalEntrance departureTerminalEntranceMonitor = new DepartureTerminalEntrance(repositoryMonitor, n);
+        DepartureTerminalTransferQuay departureTerminalTransferQuayMonitor = new DepartureTerminalTransferQuay(repositoryMonitor);
+        TemporaryStorageArea temporaryStorageAreaMonitor = new TemporaryStorageArea(repositoryMonitor);
 
         arrivalTerminalExitMonitor.setDte(departureTerminalEntranceMonitor);
         departureTerminalEntranceMonitor.setAte(arrivalTerminalExitMonitor);
 
-
-        busDriver = new BusDriverThread(0, arrivalTerminalTransferQuayMonitor, departureTerminalTransferQuayMonitor);
-        porter = new PorterThread(0, arrivalLoungeMonitor, baggageCollectionPointMonitor, temporaryStorageAreaMonitor);
-
+        BusDriverThread busDriver = new BusDriverThread(0, arrivalTerminalTransferQuayMonitor, departureTerminalTransferQuayMonitor);
+        PorterThread porter = new PorterThread(0, arrivalLoungeMonitor, baggageCollectionPointMonitor, temporaryStorageAreaMonitor);
 
         for(int f = 0; f < k; f++) {
             for(int passenger = 0; passenger < n; passenger++) {
@@ -86,7 +108,6 @@ public class AirportRhapsodyMain {
         porter.start();
 
         for(int flight = 0; flight < k; flight++) {
-            System.out.println("Starting flight " + flight);
             if(flight != 0) {
                 repositoryMonitor.prepareForNextFlight(totalLuggagePerFlight[flight], passengerSituations[flight]);
                 arrivalLoungeMonitor.prepareForNextFlight();
@@ -103,27 +124,27 @@ public class AirportRhapsodyMain {
             try {
                 for (PassengerThread passengerThread : passengers[flight]) passengerThread.join();
             } catch(InterruptedException e) {
-                System.err.println("Main: Interrupted: " + e.toString());
+                System.err.println("Main: Interrupted - joins1: " + e.toString());
             }
-
-            System.out.println("ENDED A MAIN CYCLE!");
         }
 
         try {
             busDriver.join();
             porter.join();
         } catch(InterruptedException e) {
-            System.out.println("Main: Interrupted: " + e.toString());
+            System.out.println("Main: Interrupted - joins2: " + e.toString());
         }
 
         repositoryMonitor.finalReport();
     }
-
+    /**
+     * Function that pseudo-randomly generates the initial case for every flight.
+     */
     private static void generateStartingData() {
         Random random = new Random();
         for(int flight = 0; flight < k; flight++) {
             for(int passenger = 0; passenger < n; passenger++) {
-                passengerSituations[flight][passenger] = (random.nextDouble() < FDTProb)
+                passengerSituations[flight][passenger] = (random.nextDouble() < probFDT)
                         ? PassengerThread.PassengerAndBagSituations.FDT : PassengerThread.PassengerAndBagSituations.TRT;
                 passengerLuggage[flight][passenger] = random.nextInt(m + 1);
                 int bound = (passengerLuggage[flight][passenger] == 0) ? 1 : passengerLuggage[flight][passenger];

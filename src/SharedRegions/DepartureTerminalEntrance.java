@@ -4,7 +4,6 @@ import Interfaces.DTEPassenger;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
 /** Departure Terminal Entrance: Where passengers await the last one to reach their destination within the airport to signal them that they can leave.
  * Used by PASSENGER.
  * @author sergiaguiar
@@ -19,10 +18,6 @@ public class DepartureTerminalEntrance implements DTEPassenger {
      * The Condition instance where the passengers wait for the last passenger to arrive at their final destination in the airport.
      */
     private final Condition passengerCondition;
-    /**
-     * Attribute that states whether all passengers have arrived at their final destination within the airport.
-     */
-    private int allDone;
     /**
      * Attribute that states whether all passengers were signalled by the last one to arrive yet.
      */
@@ -43,7 +38,6 @@ public class DepartureTerminalEntrance implements DTEPassenger {
      * Instance of Repository.
      */
     private final Repository repository;
-    
     /**
      * DepartureTerminalEntrance constructor.
      * @param repository A reference to a repository object.
@@ -52,7 +46,6 @@ public class DepartureTerminalEntrance implements DTEPassenger {
     public DepartureTerminalEntrance(Repository repository, int totalPassengers) {
         this.reentrantLock = new ReentrantLock(true);
         this.passengerCondition = this.reentrantLock.newCondition();
-        this.allDone = -1;
         this.allSignaled = false;
         this.totalPassengers = totalPassengers;
         this.waitingPassengers = 0;
@@ -99,7 +92,6 @@ public class DepartureTerminalEntrance implements DTEPassenger {
      * Function that allows for a transition to a new flight (new plane landing simulation).
      */
     public void prepareForNextFlight() {
-        this.allDone = -1;
         this.allSignaled = false;
         this.waitingPassengers = 0;
     }

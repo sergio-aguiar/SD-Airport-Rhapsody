@@ -3,7 +3,6 @@ package SharedRegions;
 import Interfaces.BROPassenger;
 
 import java.util.concurrent.locks.ReentrantLock;
-
 /**Baggage Reclaim Office: Where passengers report missing bags.
  * Used by PASSENGER.
  * @author sergiaguiar
@@ -18,7 +17,6 @@ public class BaggageReclaimOffice implements BROPassenger {
      * The class's Repository instance.
      */
     private final Repository repository;
-    
     /**
      * BaggageReclaimOffice constructor.
      * @param repository repository.

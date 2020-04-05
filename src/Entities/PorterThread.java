@@ -14,17 +14,24 @@ public class PorterThread extends Thread {
      * Enumerate with the Porter states.
      */
     public enum PorterStates {
-        WAITING_FOR_A_PLANE_TO_LAND("wptl"),
-        AT_THE_PLANES_HOLD("atph"),
-        AT_THE_LUGGAGE_BELT_CONVEYOR("alcb"),
-        AT_THE_STOREROOM("atsr");
-
+        WAITING_FOR_A_PLANE_TO_LAND("WPTL"),
+        AT_THE_PLANES_HOLD("APLH"),
+        AT_THE_LUGGAGE_BELT_CONVEYOR("ALCB"),
+        AT_THE_STOREROOM("ASTR");
+        /**
+         * Enum's descriptive String.
+         */
         String description;
-
+        /**
+         * PorterStates constructor.
+         * @param description Enum's descriptive String.
+         */
         PorterStates(String description) {
             this.description = description;
         }
-        
+        /**
+         * Enum's toString override
+         */
         @Override
         public String toString(){
             return this.description;

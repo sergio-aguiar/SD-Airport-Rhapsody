@@ -13,21 +13,28 @@ public class PassengerThread extends Thread {
      * Enumerate with the Passenger states.
      */
     public enum PassengerStates {
-        AT_THE_DISEMBARKING_ZONE("adz"),
-        AT_THE_LUGGAGE_COLLECTION_POINT("alc"),
-        AT_THE_LUGGAGE_RECLAIM_OFFICE("alr"),
-        EXITING_THE_ARRIVAL_TERMINAL("eat"),
-        AT_THE_ARRIVAL_TRANSFER_TERMINAL("aat"),
-        TERMINAL_TRANSFER("ttf"),
-        AT_THE_DEPARTURE_TRANSFER_TERMINAL("adt"),
-        ENTERING_THE_DEPARTURE_TERMINAL("edt");
-
+        AT_THE_DISEMBARKING_ZONE("WSD"),
+        AT_THE_LUGGAGE_COLLECTION_POINT("LCP"),
+        AT_THE_LUGGAGE_RECLAIM_OFFICE("BRO"),
+        EXITING_THE_ARRIVAL_TERMINAL("EAT"),
+        AT_THE_ARRIVAL_TRANSFER_TERMINAL("ATT"),
+        TERMINAL_TRANSFER("TRT"),
+        AT_THE_DEPARTURE_TRANSFER_TERMINAL("DTT"),
+        ENTERING_THE_DEPARTURE_TERMINAL("EDT");
+        /**
+         * Enum's descriptive String.
+         */
         String description;
-
+        /**
+         * PassengerStates constructor.
+         * @param description Enum's descriptive String.
+         */
         PassengerStates(String description) {
             this.description = description;
         }
-        
+        /**
+         * Enum's toString override
+         */
         @Override
         public String toString(){
             return this.description;
@@ -41,44 +48,45 @@ public class PassengerThread extends Thread {
     public enum PassengerAndBagSituations {
         TRT("TRT"),
         FDT("FDT");
-
+        /**
+         * Enum's descriptive String.
+         */
         String description;
-
+        /**
+         * PassengerAndBagSituations constructor.
+         * @param description Enum's descriptive String.
+         */
         PassengerAndBagSituations(String description) {
             this.description = description;
         }
-
+        /**
+         * Enum's toString override
+         */
         @Override
         public String toString() {
             return this.description;
         }
     }
-
     /**
      * Passenger's ID.
      */
     private final int pid;
-    
     /**
      * Passenger's number of luggage at the start.
      */
     private final int luggageAtStart;
-    
     /**
      * Passenger's currently collected luggage.
      */
     private int currentLuggage;
-	
 	/**
      * Passenger's flight situation.
      */
     private final PassengerAndBagSituations passengerSituation;
-
     /**
      * Passenger's current seat on the bus.
      */
     private int busSeat;
-
     /**
      * Instance of the Passenger's Arrival Lounge interface.
      */
@@ -107,7 +115,6 @@ public class PassengerThread extends Thread {
      * Instance of the Passenger's Baggage Reclaim Office interface.
      */
     private final BROPassenger broPassenger;
-	
 	 /**
       * Constructor: Passenger
       * @param id Passenger's ID.
@@ -138,7 +145,6 @@ public class PassengerThread extends Thread {
         this.dttqPassenger = dttq;
         this.broPassenger = bro;
     }
-	
 	/**
      * Execute's the passenger's life-cycle.
      */
